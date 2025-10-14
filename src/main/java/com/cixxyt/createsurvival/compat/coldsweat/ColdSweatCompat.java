@@ -1,12 +1,11 @@
-package com.cixxyt.createsurvival.registry;
+package com.cixxyt.createsurvival.compat.coldsweat;
 
 import net.minecraftforge.eventbus.api.IEventBus;
 
-public class ModBlocks {
-
+public class ColdSweatCompat {
 
     public static void registerIntegration(IEventBus eventBus) {
-        System.out.println("[CreateSurvival] Registering ModBlocks");
+        System.out.println("[CreateSurvival] Cold Sweat detected — enabling crossover features!");
 
         // Example: register custom items, temperature modifiers, etc.
         // ColdSweatAPI.registerTemperatureEffect(...);

@@ -114,13 +114,22 @@ minecraft {
 sourceSets.main.resources { srcDir 'src/generated/resources' }
 
 repositories {
+    mavenCentral()
+    mavenLocal()
+
     maven { url = "https://maven.createmod.net" } // Create, Ponder, Flywheel
     maven { url = "https://maven.ithundxr.dev/mirror" } // Registrate
     maven { url = "https://raw.githubusercontent.com/Fuzss/modresources/main/maven/" } // ForgeConfigAPIPort
+
+    flatDir {
+        dirs 'libs'
+    }
+
 }
 
 dependencies {
     minecraft "net.minecraftforge:forge:${minecraft_version}-${forge_version}"
+
     //Create & it's requirements
     implementation(fg.deobf("com.simibubi.create:create-${minecraft_version}:${create_version}:slim") { transitive = false })
     implementation(fg.deobf("net.createmod.ponder:Ponder-Forge-${minecraft_version}:${ponder_version}"))
@@ -129,6 +138,11 @@ dependencies {
     implementation(fg.deobf("com.tterrag.registrate:Registrate:${registrate_version}"))
     compileOnly(annotationProcessor("io.github.llamalad7:mixinextras-common:0.4.1"))
     implementation("io.github.llamalad7:mixinextras-forge:0.4.1")
+
+    //Cold Sweat
+    compileOnly fg.deobf("blank:ColdSweat-2.4-b05c-sources:1.20.1")
+    implementation fg.deobf("blank:ColdSweat-2.4-b05c:1.20.1")
+
 }
 
 // This block of code expands all declared replace properties in the specified resource targets.
@@ -184,6 +198,7 @@ publishing {
         maven {
             url "file://${project.projectDir}/mcmodsrepo"
         }
+
     }
 }
 
