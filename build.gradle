@@ -143,6 +143,9 @@ dependencies {
     compileOnly fg.deobf("blank:ColdSweat-2.4-b05c-sources:1.20.1")
     implementation fg.deobf("blank:ColdSweat-2.4-b05c:1.20.1")
 
+    //ThirstWasTaken
+    implementation fg.deobf("blank:ThirstWasTaken-1.20.1-1.4.0:1.20.1")
+
 }
 
 // This block of code expands all declared replace properties in the specified resource targets.
