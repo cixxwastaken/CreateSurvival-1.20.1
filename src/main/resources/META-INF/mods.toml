@@ -91,7 +91,7 @@ ordering="NONE"
 side="BOTH"
 
 [[dependencies.createsurvival]]
-modId="thirstwastaken"
+modId="thirst"
 mandatory=false
 versionRange="[1.4.0,)"
 ordering="NONE"
