@@ -1,0 +1,17 @@
+{
+  "type": "create:filling",
+  "ingredients": [
+    {
+      "item": "createsurvival:flask"
+    },
+    {
+      "amount": 1000,
+      "fluidTag": "minecraft:water"
+    }
+  ],
+  "results": [
+    {
+      "item": "createsurvival:flask_water"
+    }
+  ]
+}
