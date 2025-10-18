@@ -1,9 +1,7 @@
 package com.cixxyt.createsurvival.content.items;
 
+import com.cixxyt.createsurvival.compat.thirst.ThirstCompat;
 import com.cixxyt.createsurvival.registry.ModItems;
-import dev.ghen.thirst.content.purity.WaterPurity;
-import dev.ghen.thirst.foundation.common.capability.ModCapabilities;
-import dev.ghen.thirst.foundation.common.capability.IThirst;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TextColor;
 import net.minecraft.world.InteractionHand;
@@ -49,14 +47,12 @@ public class FlaskItemWater extends Item {
 
         // Apply Thirst effects
         if (!level.isClientSide) {
-            player.getCapability(ModCapabilities.PLAYER_THIRST).ifPresent(thirst -> {
-                thirst.drink(player, 2, 1); // 2 units, 1 saturation
-            });
+            ThirstCompat.drink(player, 2, 1);
         }
 
         // Check purity effects
-        int purity = WaterPurity.getPurity(stack);
-        WaterPurity.givePurityEffects(player, purity);
+        int purity = ThirstCompat.getPurity(stack);
+        ThirstCompat.givePurityEffects(player, purity);
 
         // If empty, return empty flask
         if (sipsLeft <= 0) {
@@ -69,10 +65,13 @@ public class FlaskItemWater extends Item {
     @Override
     public void appendHoverText(ItemStack stack, Level level, java.util.List<Component> tooltip, net.minecraft.world.item.TooltipFlag flag) {
         int sips = stack.getOrCreateTag().getInt("SipsLeft");
-        int purity = WaterPurity.getPurity(stack);
-        String purityText = WaterPurity.getPurityText(purity);
-
         tooltip.add(Component.literal("Sips left: " + sips).withStyle(style -> style.withColor(TextColor.fromRgb(0xFFFFFF))));
-        tooltip.add(Component.literal("Purity: " + purityText).withStyle(style -> style.withColor(TextColor.fromRgb(WaterPurity.getPurityColor(purity)))));
+
+        if (ThirstCompat.isLoaded()) {
+            int purity = ThirstCompat.getPurity(stack);
+            String purityText = ThirstCompat.getPurityText(purity);
+            int color = ThirstCompat.getPurityColor(purity);
+            tooltip.add(Component.literal("Purity: " + purityText).withStyle(style -> style.withColor(TextColor.fromRgb(color))));
+        }
     }
 }
