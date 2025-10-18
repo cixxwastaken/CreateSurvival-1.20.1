@@ -62,7 +62,7 @@ public class MechanicalPurifierBlock extends Block {
         }
 
         int before = ClockworkCanteenItem.getPurity(held);
-        ClockworkCanteenItem.boostPurity(held);
+        //ClockworkCanteenItem.boostPurity(held);
         int after = ClockworkCanteenItem.getPurity(held);
         if (after > before) {
             level.levelEvent(2005, pos, 0);

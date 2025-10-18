@@ -26,7 +26,7 @@ public class ThermoVestItem extends ArmorItem {
         super(CreateSurvivalArmorMaterials.CLOCKWORK, Type.CHESTPLATE, properties);
     }
 
-    @Override
+
     public void onArmorTick(Level level, Player player, ItemStack stack) {
         if (level.isClientSide) {
             return;
@@ -49,7 +49,7 @@ public class ThermoVestItem extends ArmorItem {
         }
     }
 
-    @Override
+
     public boolean canEquip(ItemStack stack, EquipmentSlot slot, net.minecraft.world.entity.LivingEntity entity) {
         return slot == EquipmentSlot.CHEST;
     }
