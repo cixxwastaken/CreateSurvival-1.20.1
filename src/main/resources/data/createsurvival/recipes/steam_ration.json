@@ -1,0 +1,19 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "conditions": [
+    {
+      "type": "forge:mod_loaded",
+      "modid": "create"
+    }
+  ],
+  "ingredients": [
+    { "item": "minecraft:cooked_beef" },
+    { "item": "create:raw_zinc" },
+    { "item": "create:andesite_alloy" },
+    { "item": "minecraft:sugar" }
+  ],
+  "result": {
+    "item": "createsurvival:steam_ration",
+    "count": 2
+  }
+}
