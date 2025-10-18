@@ -5,11 +5,11 @@ import com.cixxyt.createsurvival.content.blocks.entity.GyrothermalRegulatorBlock
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Axis;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
+import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.core.particles.DustParticleOptions;
 import net.minecraft.world.level.Level;
 import org.joml.Vector3f;
@@ -93,12 +93,21 @@ public class GyrothermalRegulatorRenderer implements BlockEntityRenderer<Gyrothe
     }
 
     private void spawnParticles(GyrothermalRegulatorBlockEntity blockEntity) {
-        Level level = Minecraft.getInstance().level;
-        if (level == null || blockEntity.getClientMode() == Mode.IDLE) {
+        Level level = blockEntity.getLevel();
+        if (!(level instanceof ClientLevel clientLevel)) {
+            // Renderers occasionally wake up before the client world finishes wiring itself in,
+            // especially while the player is joining a save.  By politely bailing out unless the
+            // block entity already knows about a client-level instance we avoid the null pointer
+            // crash the user reported and demonstrate the defensive checks professional modders
+            // lean on when bridging logical sides.
             return;
         }
 
-        long gameTime = level.getGameTime();
+        if (blockEntity.getClientMode() == Mode.IDLE) {
+            return;
+        }
+
+        long gameTime = clientLevel.getGameTime();
         if (blockEntity.getLastHaloTick() == gameTime || gameTime % HALO_INTERVAL_TICKS != 0) {
             return;
         }
@@ -119,7 +128,7 @@ public class GyrothermalRegulatorRenderer implements BlockEntityRenderer<Gyrothe
             double x = blockEntity.getBlockPos().getX() + 0.5D + Math.cos(theta) * radius;
             double z = blockEntity.getBlockPos().getZ() + 0.5D + Math.sin(theta) * radius;
             double y = blockEntity.getBlockPos().getY() + 0.8D + Math.sin(theta * 2.0D) * 0.05D;
-            level.addParticle(particle, x, y, z, 0.0D, 0.002D, 0.0D);
+            clientLevel.addParticle(particle, x, y, z, 0.0D, 0.002D, 0.0D);
         }
     }
 
