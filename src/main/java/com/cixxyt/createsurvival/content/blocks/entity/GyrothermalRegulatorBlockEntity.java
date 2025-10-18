@@ -34,7 +34,6 @@ public class GyrothermalRegulatorBlockEntity extends KineticBlockEntity {
 
     private float visualRotorSpeed;
     private float rotorAngle;
-    private long lastHaloTick = -1;
 
     public GyrothermalRegulatorBlockEntity(BlockPos pos, BlockState state) {
         super(ModBlockEntityTypes.GYROTHERMAL_REGULATOR.get(), pos, state);
@@ -139,14 +138,6 @@ public class GyrothermalRegulatorBlockEntity extends KineticBlockEntity {
     /** Angle used by the renderer to orient the rotor overlay. */
     public float getRotorAngle(float partialTicks) {
         return (rotorAngle + visualRotorSpeed * partialTicks) % 360.0f;
-    }
-
-    public long getLastHaloTick() {
-        return lastHaloTick;
-    }
-
-    public void markHaloTick(long tick) {
-        lastHaloTick = tick;
     }
 
     private void syncToClient() {

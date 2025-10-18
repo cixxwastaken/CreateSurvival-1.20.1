@@ -3,19 +3,13 @@ package com.cixxyt.createsurvival.compat.coldsweat;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.core.BlockPos;
-import net.minecraft.world.effect.MobEffect;
-import net.minecraft.world.effect.MobEffectInstance;
-import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.AABB;
-import net.minecraftforge.registries.ForgeRegistries;
 
 import java.lang.reflect.Method;
 import java.util.Arrays;
-import java.util.Comparator;
 
 /**
  * Reflection-based integration with the Cold Sweat mod.  The helper keeps track of whether Cold
@@ -79,11 +73,7 @@ public final class ColdSweatCompat {
         if (!loaded) {
             return false;
         }
-        boolean applied = applyTemperatureDelta(player, Math.abs(strength));
-        if (!applied) {
-            applyEffect(player, findEffect("warm", "toasty", "insulation"), 20 * 30, 0);
-        }
-        return applied;
+        return applyTemperatureDelta(player, Math.abs(strength));
     }
 
     /** Attempts to gently cool the player. */
@@ -91,11 +81,7 @@ public final class ColdSweatCompat {
         if (!loaded) {
             return false;
         }
-        boolean applied = applyTemperatureDelta(player, -Math.abs(strength));
-        if (!applied) {
-            applyEffect(player, findEffect("cool", "chilled", "soothed"), 20 * 30, 0);
-        }
-        return applied;
+        return applyTemperatureDelta(player, -Math.abs(strength));
     }
 
     /**
@@ -116,11 +102,7 @@ public final class ColdSweatCompat {
                 delta = Math.abs(strength);
             }
         }
-        boolean warmed = applyTemperatureDelta(player, delta);
-        if (!warmed) {
-            applyEffect(player, findEffect("comfort", "insulation", "soothed"), 20 * 10, 0);
-        }
-        return warmed;
+        return applyTemperatureDelta(player, delta);
     }
 
     /**
@@ -150,8 +132,9 @@ public final class ColdSweatCompat {
 
     /**
      * Applies a gentle heating aura around the supplied position.  Each nearby player is given the
-     * chance to benefit from Cold Sweat's temperature system; when the integration is absent we
-     * instead award a small burst of vanilla regeneration so the block still feels rewarding.
+     * chance to benefit from Cold Sweat's temperature system.  When the integration is absent we do
+     * nothing else, matching the user's request to avoid layering potion particles on top of the
+     * pedagogy-focused gameplay feedback.
      */
     public static void applyAmbientWarmth(Level level, BlockPos origin, double strength, double radius) {
         if (level == null || origin == null) {
@@ -159,17 +142,8 @@ public final class ColdSweatCompat {
         }
 
         AABB area = new AABB(origin).inflate(Math.max(1.0D, radius));
-        boolean coldSweatPresent = loaded;
-        int duration = (int) Math.ceil(20 * Math.max(4.0D, strength * 6.0D));
-
         for (Player player : level.getEntitiesOfClass(Player.class, area)) {
-            boolean applied = applyWarmth(player, strength);
-            if (!coldSweatPresent && player != null) {
-                player.addEffect(new MobEffectInstance(MobEffects.REGENERATION, duration, 0, true, true));
-            } else if (!applied && coldSweatPresent) {
-                // Cold Sweat already applies its own comfort effect through {@link #applyWarmth} when
-                // the temperature delta fails, so we simply avoid stacking an extra vanilla potion.
-            }
+            applyWarmth(player, strength);
         }
     }
 
@@ -180,17 +154,8 @@ public final class ColdSweatCompat {
         }
 
         AABB area = new AABB(origin).inflate(Math.max(1.0D, radius));
-        boolean coldSweatPresent = loaded;
-        int duration = (int) Math.ceil(20 * Math.max(4.0D, strength * 6.0D));
-
         for (Player player : level.getEntitiesOfClass(Player.class, area)) {
-            boolean applied = applyCooling(player, strength);
-            if (!coldSweatPresent && player != null) {
-                player.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SPEED, duration, 0, true, true));
-            } else if (!applied && coldSweatPresent) {
-                // As with heating, Cold Sweat already attached its own effect when the reflection
-                // call failed, so we let that stand without doubling up on vanilla particles.
-            }
+            applyCooling(player, strength);
         }
     }
 
@@ -223,27 +188,4 @@ public final class ColdSweatCompat {
         return null;
     }
 
-    private static void applyEffect(Player player, MobEffect effect, int duration, int amplifier) {
-        if (player == null || effect == null) {
-            return;
-        }
-        player.addEffect(new MobEffectInstance(effect, duration, amplifier, true, true));
-    }
-
-    private static MobEffect findEffect(String... keywords) {
-        if (!loaded) {
-            return null;
-        }
-        return ForgeRegistries.MOB_EFFECTS.getValues().stream()
-                .filter(effect -> {
-                    ResourceLocation key = ForgeRegistries.MOB_EFFECTS.getKey(effect);
-                    if (key == null || !"cold_sweat".equals(key.getNamespace())) {
-                        return false;
-                    }
-                    String path = key.getPath();
-                    return Arrays.stream(keywords).anyMatch(path::contains);
-                })
-                .min(Comparator.comparing(effect -> ForgeRegistries.MOB_EFFECTS.getKey(effect).getPath()))
-                .orElse(null);
-    }
 }

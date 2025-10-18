@@ -1,28 +1,32 @@
 package com.cixxyt.createsurvival.content.blocks.entity.renderer;
 
+import com.cixxyt.createsurvival.content.blocks.GyrothermalRegulatorBlock;
 import com.cixxyt.createsurvival.content.blocks.entity.GyrothermalRegulatorBlockEntity;
 import com.cixxyt.createsurvival.content.blocks.entity.GyrothermalRegulatorBlockEntity.Mode;
+import com.simibubi.create.AllBlocks;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Axis;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
-import net.minecraft.client.multiplayer.ClientLevel;
-import net.minecraft.core.particles.DustParticleOptions;
-import net.minecraft.world.level.Level;
-import org.joml.Vector3f;
+import net.minecraft.core.Direction;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 
 /**
  * Custom renderer that adds a lightweight Create-style visualization on top of the regulator.
  * <p>
  * Rather than model an entire Flywheel instance we draw an animated rotor cross using line
- * rendering and orbiting particle halos.  The approach keeps this example approachable for
- * students while still showing how to bridge server-side kinetics with client-side flair.
+ * rendering and reuse Create's shaft block model so a protruding axle visibly spins whenever the
+ * machine is powered.  The approach keeps this example approachable for students while still
+ * showing how to bridge server-side kinetics with client-side flair.
  */
 public class GyrothermalRegulatorRenderer implements BlockEntityRenderer<GyrothermalRegulatorBlockEntity> {
-    private static final int HALO_INTERVAL_TICKS = 5;
+    private static final BlockState SHAFT_TEMPLATE = AllBlocks.SHAFT.getDefaultState()
+            .setValue(BlockStateProperties.AXIS, Direction.Axis.Z);
 
     public GyrothermalRegulatorRenderer(BlockEntityRendererProvider.Context context) {
     }
@@ -32,7 +36,7 @@ public class GyrothermalRegulatorRenderer implements BlockEntityRenderer<Gyrothe
                        MultiBufferSource buffer, int packedLight, int packedOverlay) {
         float angle = blockEntity.getRotorAngle(partialTicks);
         drawRotor(blockEntity, poseStack, buffer, angle);
-        spawnParticles(blockEntity);
+                                                         renderShaft(blockEntity, poseStack, buffer, packedLight, packedOverlay, angle);
     }
 
     private void drawRotor(GyrothermalRegulatorBlockEntity blockEntity, PoseStack poseStack,
@@ -92,50 +96,31 @@ public class GyrothermalRegulatorRenderer implements BlockEntityRenderer<Gyrothe
         poseStack.popPose();
     }
 
-    private void spawnParticles(GyrothermalRegulatorBlockEntity blockEntity) {
-        Level level = blockEntity.getLevel();
-        if (!(level instanceof ClientLevel clientLevel)) {
-            // Renderers occasionally wake up before the client world finishes wiring itself in,
-            // especially while the player is joining a save.  By politely bailing out unless the
-            // block entity already knows about a client-level instance we avoid the null pointer
-            // crash the user reported and demonstrate the defensive checks professional modders
-            // lean on when bridging logical sides.
+    private void renderShaft(GyrothermalRegulatorBlockEntity blockEntity, PoseStack poseStack,
+                              MultiBufferSource buffer, int packedLight, int packedOverlay, float angle) {
+        if (blockEntity.getLevel() == null) {
             return;
         }
 
-        if (blockEntity.getClientMode() == Mode.IDLE) {
-            return;
-        }
+        Direction facing = blockEntity.getBlockState().getValue(GyrothermalRegulatorBlock.HORIZONTAL_FACING);
 
-        long gameTime = clientLevel.getGameTime();
-        if (blockEntity.getLastHaloTick() == gameTime || gameTime % HALO_INTERVAL_TICKS != 0) {
-            return;
-        }
+        poseStack.pushPose();
+        poseStack.translate(0.5D, 0.5D, 0.5D);
+        // Rotate the local coordinate system so positive Z always points out of the block's "front".
+        poseStack.mulPose(Axis.YP.rotationDegrees(-facing.toYRot()));
+        // Apply the spin gathered from the block entity so the shaft visibly mirrors gearbox speed.
+        poseStack.mulPose(Axis.ZP.rotationDegrees(angle));
+        // Slide the shaft forward so the Create axle pokes out of the front casing.
+        poseStack.translate(0.0D, 0.0D, 0.3125D);
 
-        blockEntity.markHaloTick(gameTime);
-        double intensity = blockEntity.getIntensity();
-        double radius = 0.45D + intensity * 0.3D;
-        Vector3f color;
-        if (blockEntity.getClientMode() == Mode.HEATING) {
-            color = new Vector3f(1.0F, 0.5F + (float) intensity * 0.4F, 0.2F);
-        } else {
-            color = new Vector3f(0.2F, 0.6F, 0.9F + (float) intensity * 0.1F);
-        }
-        DustParticleOptions particle = new DustParticleOptions(color, 1.0F);
-
-        for (int i = 0; i < 4; i++) {
-            double theta = (gameTime / 6.0D) + (Math.PI / 2.0D) * i;
-            double x = blockEntity.getBlockPos().getX() + 0.5D + Math.cos(theta) * radius;
-            double z = blockEntity.getBlockPos().getZ() + 0.5D + Math.sin(theta) * radius;
-            double y = blockEntity.getBlockPos().getY() + 0.8D + Math.sin(theta * 2.0D) * 0.05D;
-            clientLevel.addParticle(particle, x, y, z, 0.0D, 0.002D, 0.0D);
-        }
+        Minecraft.getInstance().getBlockRenderer().renderSingleBlock(SHAFT_TEMPLATE, poseStack, buffer, packedLight, packedOverlay);
+        poseStack.popPose();
     }
 
     @Override
     public boolean shouldRenderOffScreen(GyrothermalRegulatorBlockEntity blockEntity) {
-        // Returning true keeps the halo visible even when the block is barely off camera, matching
-        // Create's theatrical presentation style.
+        // Returning true keeps the animated axle visible even when the block is barely off camera,
+        // matching Create's theatrical presentation style.
         return true;
     }
 }

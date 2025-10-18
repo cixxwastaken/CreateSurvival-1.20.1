@@ -7,14 +7,21 @@ import com.simibubi.create.foundation.block.IBE;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.item.context.BlockPlaceContext;
+import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelReader;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityTicker;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.shapes.CollisionContext;
+import net.minecraft.world.phys.shapes.Shapes;
+import net.minecraft.world.phys.shapes.VoxelShape;
 
 import javax.annotation.Nullable;
+
+import java.util.Map;
 
 /**
  * Rotary climate control for Create machines.
@@ -26,6 +33,29 @@ import javax.annotation.Nullable;
  * encapsulated on the server while still allowing rich client-side visualization.
  */
 public class GyrothermalRegulatorBlock extends HorizontalKineticBlock implements IBE<GyrothermalRegulatorBlockEntity> {
+    private static final VoxelShape SHAPE_SOUTH = Shapes.or(
+            Block.box(1, 0, 1, 15, 16, 15),
+            Block.box(5, 5, 15, 11, 11, 18)
+    );
+    private static final VoxelShape SHAPE_NORTH = Shapes.or(
+            Block.box(1, 0, 1, 15, 16, 15),
+            Block.box(5, 5, -2, 11, 11, 1)
+    );
+    private static final VoxelShape SHAPE_EAST = Shapes.or(
+            Block.box(1, 0, 1, 15, 16, 15),
+            Block.box(15, 5, 5, 18, 11, 11)
+    );
+    private static final VoxelShape SHAPE_WEST = Shapes.or(
+            Block.box(1, 0, 1, 15, 16, 15),
+            Block.box(-2, 5, 5, 1, 11, 11)
+    );
+    private static final Map<Direction, VoxelShape> SHAPES = Map.of(
+            Direction.SOUTH, SHAPE_SOUTH,
+            Direction.NORTH, SHAPE_NORTH,
+            Direction.EAST, SHAPE_EAST,
+            Direction.WEST, SHAPE_WEST
+    );
+
     public GyrothermalRegulatorBlock(Properties properties) {
         super(properties);
         // Default new placements so that the exposed shaft faces the player.  This mirrors how
@@ -36,6 +66,14 @@ public class GyrothermalRegulatorBlock extends HorizontalKineticBlock implements
         // run into Forge's "duplicate property" crash; leaving the configuration in the constructor
         // highlights that the base class has already done the heavy lifting for us.
         this.registerDefaultState(this.defaultBlockState().setValue(HORIZONTAL_FACING, Direction.SOUTH));
+    }
+
+    @Override
+    public VoxelShape getShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext context) {
+        // The physical outline mirrors the new model: a slightly inset brass chassis plus the shaft
+        // nub that now protrudes from the front face.  Explicitly rotating the hitbox teaches
+        // students that block shapes can extend beyond the default cube to match bespoke models.
+        return SHAPES.getOrDefault(state.getValue(HORIZONTAL_FACING), SHAPE_SOUTH);
     }
 
     @Nullable
