@@ -1,25 +1,17 @@
 package com.cixxyt.createsurvival.compat.create;
 
 import net.minecraftforge.eventbus.api.IEventBus;
-import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 
-public class CreateCompat {
-    public static void registerIntegration(FMLCommonSetupEvent event) {
-//        event.enqueueWork(() -> {
-//            // Register the flask with GenericItemFilling
-//            GenericItemFilling.registerItemFiller(
-//                    (level, stack) -> stack.getItem() instanceof FlaskItem,
-//                    (level, stack, fluidStack) -> ((FlaskItem) stack.getItem()).fillFromSpout(level, stack, fluidStack),
-//                    (level, stack, fluidStack) -> ((FlaskItem) stack.getItem()).getRequiredAmountForFill(level, stack, fluidStack),
-//                    (stack) -> ((FlaskItem) stack.getItem()).canBeFilledFromSpout(stack)
-//            );
-//        });
+/**
+ * Placeholder for future Create API hooks.  The addon already assumes Create is installed, but the
+ * helper keeps the call site consistent with our other optional integrations.
+ */
+public final class CreateCompat {
+    private CreateCompat() {}
 
-    }
     public static void registerIntegration(IEventBus eventBus) {
-        System.out.println("[CreateSurvival] Cold Sweat detected — enabling crossover features!");
-
-        // Example: register custom items, temperature modifiers, etc.
-        // ColdSweatAPI.registerTemperatureEffect(...);
+        // No-op for now; recipes already reference Create components and therefore naturally gate
+        // progression.  This method exists primarily to mirror the structure of the other compat
+        // helpers and to give future patches a home for Create-specific registries.
     }
 }

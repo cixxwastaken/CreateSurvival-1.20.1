@@ -5,7 +5,6 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.Style;
 import net.minecraft.network.chat.TextColor;
-import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.tags.FluidTags;
 import net.minecraft.tags.TagKey;
@@ -20,6 +19,11 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.List;
 
+/**
+ * Reflection helper that mirrors the Thirst Was Taken API without forcing a hard dependency.
+ * Every method checks the cached reflection handles before doing work so standalone installations
+ * stay stable.
+ */
 public class ThirstCompat {
 
     private static boolean loaded = false;

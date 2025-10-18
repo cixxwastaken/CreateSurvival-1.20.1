@@ -1,5 +1,6 @@
 package com.cixxyt.createsurvival.content.items;
 
+import com.cixxyt.createsurvival.compat.coldsweat.ColdSweatCompat;
 import com.cixxyt.createsurvival.compat.thirst.ThirstCompat;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
@@ -19,6 +20,11 @@ import net.minecraft.world.level.Level;
 
 import java.util.List;
 
+/**
+ * Dense meal that trades Create's steam power for calories.  The {@link FoodProperties} builder
+ * exposes a fluent API, letting us layer potion effects and saturation bonuses in an easily read
+ * format for students inspecting the code.
+ */
 public class SteamRationItem extends Item {
     private static final FoodProperties RATION = new FoodProperties.Builder()
             .nutrition(8)
@@ -37,6 +43,7 @@ public class SteamRationItem extends Item {
         ItemStack result = super.finishUsingItem(stack, level, entity);
         if (entity instanceof Player player && !level.isClientSide()) {
             ThirstCompat.drink(player, 2, 1);
+            ColdSweatCompat.applyWarmth(player, 0.2D);
         }
         return result;
     }
@@ -44,6 +51,12 @@ public class SteamRationItem extends Item {
     @Override
     public void appendHoverText(ItemStack stack, Level level, List<Component> tooltip, TooltipFlag flag) {
         tooltip.add(Component.translatable("item.createsurvival.steam_ration.tooltip").withStyle(ChatFormatting.GRAY));
+        if (ColdSweatCompat.isLoaded()) {
+            tooltip.add(Component.translatable("item.createsurvival.steam_ration.tooltip.coldsweat").withStyle(ChatFormatting.AQUA));
+        }
+        if (ThirstCompat.isLoaded()) {
+            tooltip.add(Component.translatable("item.createsurvival.steam_ration.tooltip.thirst").withStyle(ChatFormatting.BLUE));
+        }
     }
 
     @Override

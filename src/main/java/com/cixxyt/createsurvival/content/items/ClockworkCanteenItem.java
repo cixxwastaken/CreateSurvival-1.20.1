@@ -5,8 +5,12 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResultHolder;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Rarity;
@@ -17,13 +21,14 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
-import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.player.Player;
-import net.minecraft.sounds.SoundEvents;
-import net.minecraft.sounds.SoundSource;
 
 import java.util.List;
 
+/**
+ * Multi-use water container that stores the purity of the source block used to fill it.  The
+ * implementation mirrors Create's mechanical vibe while teaching how to juggle Forge's item
+ * lifecycle hooks and a third-party capability (Thirst) via reflection.
+ */
 public class ClockworkCanteenItem extends Item {
     private static final String TAG_SIPS = "Sips";
     private static final String TAG_LAST_PURITY = "Purity";
@@ -31,6 +36,7 @@ public class ClockworkCanteenItem extends Item {
     public static final int MAX_PURITY = 3;
 
     public ClockworkCanteenItem(Properties properties) {
+        // A singleton stack keeps the bookkeeping simple and matches the "cherished tool" fantasy.
         super(properties.stacksTo(1).rarity(Rarity.UNCOMMON));
     }
 
@@ -38,6 +44,8 @@ public class ClockworkCanteenItem extends Item {
     public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand hand) {
         ItemStack stack = player.getItemInHand(hand);
         if (!isFilled(stack)) {
+            // Empty canteens try to collect water from the targeted block.  Forge's helper performs
+            // the ray trace, automatically respecting sneaking and fluid filtering rules.
             BlockHitResult hitResult = getPlayerPOVHitResult(level, player, ClipContext.Fluid.SOURCE_ONLY);
             if (hitResult.getType() == HitResult.Type.BLOCK) {
                 BlockPos pos = hitResult.getBlockPos();
@@ -53,6 +61,7 @@ public class ClockworkCanteenItem extends Item {
             return InteractionResultHolder.pass(stack);
         }
 
+        // Filled canteens behave like vanilla potions: hold the button to start drinking.
         player.startUsingItem(hand);
         return InteractionResultHolder.consume(stack);
     }
@@ -75,6 +84,7 @@ public class ClockworkCanteenItem extends Item {
 
         int purity = getPurity(stack);
         if (!level.isClientSide()) {
+            // We ask Thirst to handle both the hydration gain and any side effects tied to purity.
             ThirstCompat.applyPurityEffects(player, stack);
             ThirstCompat.drink(player, Math.max(2, purity + 1), Math.max(1, purity));
         }
@@ -92,8 +102,8 @@ public class ClockworkCanteenItem extends Item {
 
     @Override
     public void appendHoverText(ItemStack stack, Level level, List<Component> tooltip, TooltipFlag flag) {
-        int sips = getSips(stack);
-        tooltip.add(Component.translatable("item.createsurvival.clockwork_canteen.sips", sips, MAX_SIPS).withStyle(ChatFormatting.GRAY));
+        tooltip.add(Component.translatable("item.createsurvival.clockwork_canteen.sips", getSips(stack), MAX_SIPS).withStyle(ChatFormatting.GRAY));
+        // When Thirst is present we defer to its tooltip text; otherwise we provide a simple readout.
         ThirstCompat.appendPurityTooltip(stack, tooltip);
         if (!ThirstCompat.isLoaded()) {
             int purity = getPurity(stack);
@@ -157,10 +167,6 @@ public class ClockworkCanteenItem extends Item {
             tag.remove(TAG_LAST_PURITY);
         }
         ThirstCompat.setPurity(stack, 0);
-    }
-
-    public static void boostPurity(ItemStack stack) {
-        setPurity(stack, Math.min(MAX_PURITY, getPurity(stack) + 1));
     }
 
     public static void fillFromSource(ItemStack stack, Level level, BlockPos pos) {
