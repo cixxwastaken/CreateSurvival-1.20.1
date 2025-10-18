@@ -1,0 +1,23 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "conditions": [
+    {
+      "type": "forge:mod_loaded",
+      "modid": "create"
+    }
+  ],
+  "pattern": [
+    "SPS",
+    "GCG",
+    "SPS"
+  ],
+  "key": {
+    "S": { "item": "create:shaft" },
+    "P": { "item": "create:fluid_pipe" },
+    "G": { "item": "minecraft:iron_ingot" },
+    "C": { "item": "minecraft:compass" }
+  },
+  "result": {
+    "item": "createsurvival:mechanical_purifier"
+  }
+}

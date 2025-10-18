@@ -1,0 +1,6 @@
+{
+  "variants": {
+    "powered=true": { "model": "createsurvival:block/mechanical_purifier" },
+    "powered=false": { "model": "createsurvival:block/mechanical_purifier" }
+  }
+}
