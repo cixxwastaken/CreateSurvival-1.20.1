@@ -1,44 +1,50 @@
 package com.cixxyt.createsurvival.content.items;
 
-import com.cixxyt.createsurvival.registry.ModItems;
-import dev.ghen.thirst.content.purity.WaterPurity;
 import net.minecraft.core.BlockPos;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.ItemUtils;
+import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.level.material.Fluids;
-import net.minecraft.sounds.SoundEvents;
-import net.minecraft.sounds.SoundSource;
+import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.HitResult;
 
 public class FlaskItem extends Item {
 
     public FlaskItem(Properties properties) {
-        super(properties.stacksTo(1));
+        super(properties);
     }
 
-    // Right-click water to fill
     @Override
     public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand hand) {
         ItemStack stack = player.getItemInHand(hand);
-        BlockPos pos = player.blockPosition();
-
-        if (!level.isClientSide && level.getFluidState(pos).isSource() && level.getFluidState(pos).getType() == Fluids.WATER) {
-            // Create filled flask
-            ItemStack filled = new ItemStack(ModItems.FLASK_WATER.get());
-            filled.getOrCreateTag().putInt("SipsLeft", 5);
-
-            // Add purity using WaterPurity helper
-            WaterPurity.addPurity(filled, WaterPurity.getBlockPurity(level, pos));
-
-            level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.BOTTLE_FILL, SoundSource.NEUTRAL, 1f, 1f);
-
-            return InteractionResultHolder.success(filled);
+        HitResult hitResult = getPlayerPOVHitResult(level, player, ClipContext.Fluid.SOURCE_ONLY);
+        if (hitResult.getType() != HitResult.Type.BLOCK) {
+            return InteractionResultHolder.pass(stack);
         }
 
-        return InteractionResultHolder.pass(stack);
+        BlockHitResult blockHit = (BlockHitResult) hitResult;
+        BlockPos pos = blockHit.getBlockPos();
+        if (!level.mayInteract(player, pos) || !player.mayUseItemAt(pos, blockHit.getDirection(), stack)) {
+            return InteractionResultHolder.fail(stack);
+        }
+
+        FluidState fluidState = level.getFluidState(pos);
+        if (!fluidState.isSource() || fluidState.getType() != Fluids.WATER) {
+            return InteractionResultHolder.pass(stack);
+        }
+
+        ItemStack filled = FlaskItemWater.createFilledStack(level, pos);
+
+        level.playSound(player, pos, SoundEvents.BOTTLE_FILL, SoundSource.NEUTRAL, 1f, 1f);
+        ItemStack result = ItemUtils.createFilledResult(stack, player, filled);
+        return InteractionResultHolder.sidedSuccess(result, level.isClientSide);
     }
 }

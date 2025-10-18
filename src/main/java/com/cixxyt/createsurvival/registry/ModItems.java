@@ -2,6 +2,7 @@ package com.cixxyt.createsurvival.registry;
 
 import com.cixxyt.createsurvival.CreateSurvivalMod;
 import com.cixxyt.createsurvival.content.items.FlaskItem;
+import com.cixxyt.createsurvival.content.items.FlaskItemWater;
 import net.minecraft.world.item.Item;
 import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.RegistryObject;
@@ -21,7 +22,7 @@ public class ModItems {
     public static final RegistryObject<Item> FLASK = ITEMS.register("flask",
             () -> new FlaskItem(new Item.Properties().stacksTo(1)));
     public static final RegistryObject<Item> FLASK_WATER = ITEMS.register("flask_water",
-            () -> new FlaskItem(new Item.Properties().stacksTo(1)));
+            () -> new FlaskItemWater(new Item.Properties().stacksTo(1)));
 
     public static void register(IEventBus eventBus) {
         ITEMS.register(eventBus);
