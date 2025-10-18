@@ -7,6 +7,7 @@ import com.cixxyt.createsurvival.content.items.SteamRationItem;
 import com.cixxyt.createsurvival.content.items.SurveyorThermometerItem;
 import com.cixxyt.createsurvival.content.items.ThermoVestItem;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.item.BlockItem;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.registries.DeferredRegister;
@@ -23,6 +24,14 @@ public final class ModItems {
 
     public static final DeferredRegister<Item> ITEMS =
             DeferredRegister.create(ForgeRegistries.ITEMS, CreateSurvivalMod.MODID);
+
+    /**
+     * The lamp's {@link BlockItem} makes it placeable from an inventory slot.  Because the block
+     * relies on Create for power, we tuck the explanation directly in the comment so readers learn
+     * that it passively listens for stress without ever generating its own.
+     */
+    public static final RegistryObject<Item> MECHANICAL_LAMP = ITEMS.register("mechanical_lamp",
+            () -> new BlockItem(ModBlocks.MECHANICAL_LAMP.get(), new Item.Properties()));
 
     public static final RegistryObject<Item> CLOCKWORK_CANTEEN = ITEMS.register("clockwork_canteen",
             () -> new ClockworkCanteenItem(new Item.Properties()));

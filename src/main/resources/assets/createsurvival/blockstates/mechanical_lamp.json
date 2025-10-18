@@ -1,0 +1,16 @@
+{
+  "multipart": [
+    {
+      "when": { "axis": "x" },
+      "apply": { "model": "createsurvival:block/mechanical_lamp", "x": 90, "y": 90 }
+    },
+    {
+      "when": { "axis": "y" },
+      "apply": { "model": "createsurvival:block/mechanical_lamp" }
+    },
+    {
+      "when": { "axis": "z" },
+      "apply": { "model": "createsurvival:block/mechanical_lamp", "x": 90 }
+    }
+  ]
+}
