@@ -1,7 +1,7 @@
 package com.cixxyt.createsurvival.content.items;
 
+import com.cixxyt.createsurvival.compat.thirst.ThirstCompat;
 import com.cixxyt.createsurvival.registry.ModItems;
-import dev.ghen.thirst.content.purity.WaterPurity;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResultHolder;
@@ -31,8 +31,8 @@ public class FlaskItem extends Item {
             ItemStack filled = new ItemStack(ModItems.FLASK_WATER.get());
             filled.getOrCreateTag().putInt("SipsLeft", 5);
 
-            // Add purity using WaterPurity helper
-            WaterPurity.addPurity(filled, WaterPurity.getBlockPurity(level, pos));
+            // Add purity if the Thirst mod is available
+            ThirstCompat.applyBlockPurity(filled, level, pos);
 
             level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.BOTTLE_FILL, SoundSource.NEUTRAL, 1f, 1f);
 
