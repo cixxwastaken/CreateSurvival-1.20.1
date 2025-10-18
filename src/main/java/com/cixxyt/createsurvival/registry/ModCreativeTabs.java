@@ -59,6 +59,7 @@ public final class ModCreativeTabs {
                         output.accept(ModItems.STEAM_CANISTER.get());
                         output.accept(ModItems.SURVEYOR_THERMOMETER.get());
                         output.accept(ModItems.THERMO_VEST.get());
+                        output.accept(ModBlocks.MECHANICAL_LAMP.get());
                     })
                     .build());
 
