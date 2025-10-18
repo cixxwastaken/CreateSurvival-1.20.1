@@ -3,16 +3,13 @@ package com.cixxyt.createsurvival.compat.coldsweat;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.effect.MobEffect;
-import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
-import net.minecraftforge.registries.ForgeRegistries;
+import net.minecraft.world.phys.AABB;
 
 import java.lang.reflect.Method;
 import java.util.Arrays;
-import java.util.Comparator;
 
 /**
  * Reflection-based integration with the Cold Sweat mod.  The helper keeps track of whether Cold
@@ -76,11 +73,7 @@ public final class ColdSweatCompat {
         if (!loaded) {
             return false;
         }
-        boolean applied = applyTemperatureDelta(player, Math.abs(strength));
-        if (!applied) {
-            applyEffect(player, findEffect("warm", "toasty", "insulation"), 20 * 30, 0);
-        }
-        return applied;
+        return applyTemperatureDelta(player, Math.abs(strength));
     }
 
     /** Attempts to gently cool the player. */
@@ -88,11 +81,7 @@ public final class ColdSweatCompat {
         if (!loaded) {
             return false;
         }
-        boolean applied = applyTemperatureDelta(player, -Math.abs(strength));
-        if (!applied) {
-            applyEffect(player, findEffect("cool", "chilled", "soothed"), 20 * 30, 0);
-        }
-        return applied;
+        return applyTemperatureDelta(player, -Math.abs(strength));
     }
 
     /**
@@ -113,11 +102,7 @@ public final class ColdSweatCompat {
                 delta = Math.abs(strength);
             }
         }
-        boolean warmed = applyTemperatureDelta(player, delta);
-        if (!warmed) {
-            applyEffect(player, findEffect("comfort", "insulation", "soothed"), 20 * 10, 0);
-        }
-        return warmed;
+        return applyTemperatureDelta(player, delta);
     }
 
     /**
@@ -143,6 +128,35 @@ public final class ColdSweatCompat {
             descriptor.append(Component.literal(" ").append(Component.translatable("tooltip.createsurvival.temperature.hot")).withStyle(ChatFormatting.RED));
         }
         return descriptor;
+    }
+
+    /**
+     * Applies a gentle heating aura around the supplied position.  Each nearby player is given the
+     * chance to benefit from Cold Sweat's temperature system.  When the integration is absent we do
+     * nothing else, matching the user's request to avoid layering potion particles on top of the
+     * pedagogy-focused gameplay feedback.
+     */
+    public static void applyAmbientWarmth(Level level, BlockPos origin, double strength, double radius) {
+        if (level == null || origin == null) {
+            return;
+        }
+
+        AABB area = new AABB(origin).inflate(Math.max(1.0D, radius));
+        for (Player player : level.getEntitiesOfClass(Player.class, area)) {
+            applyWarmth(player, strength);
+        }
+    }
+
+    /** Mirrors {@link #applyAmbientWarmth(Level, BlockPos, double, double)} but for cooling. */
+    public static void applyAmbientCooling(Level level, BlockPos origin, double strength, double radius) {
+        if (level == null || origin == null) {
+            return;
+        }
+
+        AABB area = new AABB(origin).inflate(Math.max(1.0D, radius));
+        for (Player player : level.getEntitiesOfClass(Player.class, area)) {
+            applyCooling(player, strength);
+        }
     }
 
     private static boolean applyTemperatureDelta(Player player, double delta) {
@@ -174,27 +188,4 @@ public final class ColdSweatCompat {
         return null;
     }
 
-    private static void applyEffect(Player player, MobEffect effect, int duration, int amplifier) {
-        if (player == null || effect == null) {
-            return;
-        }
-        player.addEffect(new MobEffectInstance(effect, duration, amplifier, true, true));
-    }
-
-    private static MobEffect findEffect(String... keywords) {
-        if (!loaded) {
-            return null;
-        }
-        return ForgeRegistries.MOB_EFFECTS.getValues().stream()
-                .filter(effect -> {
-                    ResourceLocation key = ForgeRegistries.MOB_EFFECTS.getKey(effect);
-                    if (key == null || !"cold_sweat".equals(key.getNamespace())) {
-                        return false;
-                    }
-                    String path = key.getPath();
-                    return Arrays.stream(keywords).anyMatch(path::contains);
-                })
-                .min(Comparator.comparing(effect -> ForgeRegistries.MOB_EFFECTS.getKey(effect).getPath()))
-                .orElse(null);
-    }
 }
