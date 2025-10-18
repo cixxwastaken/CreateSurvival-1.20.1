@@ -20,6 +20,10 @@
   "item.createsurvival.thermo_vest.tooltip.coldsweat": "Actively balances Cold Sweat body temperature while powered by motion.",
   "block.createsurvival.mechanical_lamp": "Mechanical Lamp",
   "block.createsurvival.mechanical_lamp.tooltip": "Shines brighter as Create's shafts spin faster beneath it.",
+  "block.createsurvival.gyrothermal_regulator": "Gyrothermal Regulator",
+  "block.createsurvival.gyrothermal_regulator.tooltip": "Direction-sensitive climate control that rewards clever gearbox tuning.",
+  "tooltip.createsurvival.gyrothermal_regulator": "Feed the front shaft with clockwise rotation to radiate warmth over a camp.",
+  "tooltip.createsurvival.gyrothermal_regulator.controls": "Flip a clutch or gearbox to reverse the rotor and vent refreshing chills.",
   "tooltip.createsurvival.purity_level": "Purity Tier %s",
   "tooltip.createsurvival.temperature.cold": "Bundle up!",
   "tooltip.createsurvival.temperature.hot": "Stay hydrated!"
