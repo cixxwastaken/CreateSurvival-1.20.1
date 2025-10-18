@@ -102,6 +102,8 @@ public class ClockworkCanteenItem extends Item {
         }
     }
 
+    
+
     @Override
     public boolean isBarVisible(ItemStack stack) {
         return isFilled(stack);
