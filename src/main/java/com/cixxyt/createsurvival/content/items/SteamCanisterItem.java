@@ -1,7 +1,7 @@
 package com.cixxyt.createsurvival.content.items;
 
-import com.cixxyt.createsurvival.compat.coldsweat.ColdSweatCompat;
-import com.cixxyt.createsurvival.compat.thirst.ThirstCompat;
+import com.cixxyt.createsurvival.systems.TemperatureSystem;
+import com.cixxyt.createsurvival.systems.ThirstSystem;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 import net.minecraft.sounds.SoundEvents;
@@ -23,8 +23,8 @@ import net.minecraft.world.level.Level;
 import java.util.List;
 
 /**
- * Emergency ration that vents condensed steam.  The burst hydrates Thirst players, soothes Cold
- * Sweat temperatures, and still gives vanilla players a regeneration safety net.
+ * Emergency ration that vents condensed steam.  The burst hydrates our in-house thirst meter,
+ * cools the custom temperature system, and still gives vanilla players a regeneration safety net.
  */
 public class SteamCanisterItem extends Item {
     public SteamCanisterItem(Properties properties) {
@@ -46,8 +46,8 @@ public class SteamCanisterItem extends Item {
             if (!level.isClientSide()) {
                 player.addEffect(new MobEffectInstance(MobEffects.REGENERATION, 20 * 8, 0));
                 player.addEffect(new MobEffectInstance(MobEffects.ABSORPTION, 20 * 30, 0));
-                ColdSweatCompat.applyCooling(player, 0.3D);
-                ThirstCompat.drink(player, 2, 2);
+                TemperatureSystem.applyCooling(player, 0.3D);
+                ThirstSystem.drink(player, 2, 2);
             }
             level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.BREWING_STAND_BREW, SoundSource.PLAYERS, 0.6F, 1.2F);
         }
@@ -67,11 +67,7 @@ public class SteamCanisterItem extends Item {
     @Override
     public void appendHoverText(ItemStack stack, Level level, List<Component> tooltip, TooltipFlag flag) {
         tooltip.add(Component.translatable("item.createsurvival.steam_canister.tooltip").withStyle(ChatFormatting.GRAY));
-        if (ColdSweatCompat.isLoaded()) {
-            tooltip.add(Component.translatable("item.createsurvival.steam_canister.tooltip.coldsweat").withStyle(ChatFormatting.AQUA));
-        }
-        if (ThirstCompat.isLoaded()) {
-            tooltip.add(Component.translatable("item.createsurvival.steam_canister.tooltip.thirst").withStyle(ChatFormatting.BLUE));
-        }
+        tooltip.add(Component.translatable("item.createsurvival.steam_canister.tooltip.temperature").withStyle(ChatFormatting.AQUA));
+        ThirstSystem.appendHydrationTooltip(tooltip);
     }
 }
