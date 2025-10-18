@@ -17,7 +17,7 @@ import net.minecraft.sounds.SoundSource;
 public class FlaskItem extends Item {
 
     public FlaskItem(Properties properties) {
-        super(properties.stacksTo(1));
+        super(properties);
     }
 
     // Right-click water to fill

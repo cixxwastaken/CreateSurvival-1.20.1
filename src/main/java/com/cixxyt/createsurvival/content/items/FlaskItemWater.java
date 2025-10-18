@@ -16,7 +16,7 @@ import net.minecraft.world.level.Level;
 public class FlaskItemWater extends Item {
 
     public FlaskItemWater(Properties properties) {
-        super(properties.stacksTo(1));
+        super(properties);
     }
 
     @Override

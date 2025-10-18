@@ -37,7 +37,7 @@ public class CreateSurvivalMod {
         if (ModList.get().isLoaded("create")) {
             CreateCompat.registerIntegration(modEventBus);
         }
-        if (ModList.get().isLoaded("thirstwastaken")) {
+        if (ModList.get().isLoaded("thirst")) {
             ThirstCompat.init();
         }
     }
