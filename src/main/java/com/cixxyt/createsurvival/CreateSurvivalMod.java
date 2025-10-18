@@ -1,12 +1,11 @@
 package com.cixxyt.createsurvival;
 
-import com.cixxyt.createsurvival.compat.coldsweat.ColdSweatCompat;
 import com.cixxyt.createsurvival.compat.create.CreateCompat;
-import com.cixxyt.createsurvival.compat.thirst.ThirstCompat;
 import com.cixxyt.createsurvival.registry.ModBlocks;
 import com.cixxyt.createsurvival.registry.ModBlockEntityTypes;
 import com.cixxyt.createsurvival.registry.ModCreativeTabs;
 import com.cixxyt.createsurvival.registry.ModItems;
+import com.cixxyt.createsurvival.systems.SurvivalSystems;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.fml.ModList;
 import net.minecraftforge.fml.common.Mod;
@@ -42,11 +41,9 @@ public class CreateSurvivalMod {
         if (ModList.get().isLoaded("create")) {
             CreateCompat.registerIntegration(modEventBus);
         }
-        if (ModList.get().isLoaded("cold_sweat")) {
-            ColdSweatCompat.init();
-        }
-        if (ModList.get().isLoaded("thirst")) {
-            ThirstCompat.init();
-        }
+        // Our in-house survival managers replace the external integrations entirely.  Initializing
+        // them here teaches how to register gameplay systems alongside registry calls without
+        // depending on optional mods.
+        SurvivalSystems.init();
     }
 }

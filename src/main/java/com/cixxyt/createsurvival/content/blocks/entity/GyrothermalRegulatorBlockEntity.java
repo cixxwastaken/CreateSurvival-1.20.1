@@ -1,6 +1,6 @@
 package com.cixxyt.createsurvival.content.blocks.entity;
 
-import com.cixxyt.createsurvival.compat.coldsweat.ColdSweatCompat;
+import com.cixxyt.createsurvival.systems.TemperatureSystem;
 import com.cixxyt.createsurvival.registry.ModBlockEntityTypes;
 import com.simibubi.create.content.kinetics.base.KineticBlockEntity;
 import net.minecraft.core.BlockPos;
@@ -21,7 +21,7 @@ import javax.annotation.Nullable;
  * job is to observe the delivered {@link #getSpeed()} and decide what sort of climate boost to
  * apply.  Positive rotation is interpreted as "heat the room" while negative rotation signals
  * "pull heat out".  When the rotor idles the machine politely goes dormant, avoiding needless
- * Cold Sweat updates.
+ * temperature churn.
  */
 public class GyrothermalRegulatorBlockEntity extends KineticBlockEntity {
     private static final float MIN_OPERATION_SPEED = 8.0f;
@@ -100,10 +100,10 @@ public class GyrothermalRegulatorBlockEntity extends KineticBlockEntity {
 
         if (mode == Mode.HEATING) {
             // Heating mode walks nearby students through how Create power can warm a camp.
-            ColdSweatCompat.applyAmbientWarmth(level, getBlockPos(), strength, radius);
+            TemperatureSystem.applyAmbientWarmth(level, getBlockPos(), strength, radius);
         } else {
             // Cooling mode mirrors the branch above but leans into evaporative relief instead.
-            ColdSweatCompat.applyAmbientCooling(level, getBlockPos(), strength, radius);
+            TemperatureSystem.applyAmbientCooling(level, getBlockPos(), strength, radius);
         }
         syncToClient();
     }

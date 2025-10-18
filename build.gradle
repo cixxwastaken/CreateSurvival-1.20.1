@@ -140,11 +140,16 @@ dependencies {
     implementation("io.github.llamalad7:mixinextras-forge:0.4.1")
 
     //Cold Sweat
-    compileOnly fg.deobf("blank:ColdSweat-2.4-b05c-sources:1.20.1")
-    implementation fg.deobf("blank:ColdSweat-2.4-b05c:1.20.1")
+    // The Cold Sweat dependency is intentionally commented out while we develop our in-house
+    // temperature system.  Leaving the coordinates here documents the previous integration for
+    // curious students without forcing them to download the companion mod.
+    // compileOnly fg.deobf("blank:ColdSweat-2.4-b05c-sources:1.20.1")
+    // implementation fg.deobf("blank:ColdSweat-2.4-b05c:1.20.1")
 
-    //ThirstWasTaken
-    implementation fg.deobf("blank:ThirstWasTaken-1.20.1-1.4.0:1.20.1")
+    // Thirst Was Taken previously fueled hydration but is disabled while we prototype the new
+    // survival framework.  Commenting out the dependency keeps Gradle from downloading the mod
+    // while preserving the historical context for curious readers.
+    // implementation fg.deobf("blank:ThirstWasTaken-1.20.1-1.4.0:1.20.1")
 
 }
 

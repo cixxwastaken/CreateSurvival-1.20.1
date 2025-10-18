@@ -163,9 +163,8 @@ public class ModRecipes {
             return true;
         }
 
-        // When the Thirst mod exposes purity through NBT we treat any water-adjacent fluid with a
-        // positive purity value as valid.  This keeps the automation path compatible with datapacks
-        // that tweak the exact fluid registry entry.
+        // The new thirst manager still honors any fluid that advertises a positive purity value so
+        // datapacks can experiment with Create automation without touching Java code.
         if (fluid.getFluid().isSame(Fluids.WATER)) {
             return getPurityFromFluid(fluid) > 0;
         }
