@@ -1,0 +1,9 @@
+{
+  "parent": "minecraft:block/orientable",
+  "textures": {
+    "front": "create:block/brass_casing",
+    "side": "create:block/copper_casing",
+    "top": "create:block/copper_sheet",
+    "bottom": "create:block/copper_sheet"
+  }
+}
