@@ -1,7 +1,7 @@
 package com.cixxyt.createsurvival.content.items;
 
-import com.cixxyt.createsurvival.compat.coldsweat.ColdSweatCompat;
-import com.cixxyt.createsurvival.compat.thirst.ThirstCompat;
+import com.cixxyt.createsurvival.systems.TemperatureSystem;
+import com.cixxyt.createsurvival.systems.ThirstSystem;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.InteractionHand;
@@ -42,8 +42,8 @@ public class SteamRationItem extends Item {
     public ItemStack finishUsingItem(ItemStack stack, Level level, LivingEntity entity) {
         ItemStack result = super.finishUsingItem(stack, level, entity);
         if (entity instanceof Player player && !level.isClientSide()) {
-            ThirstCompat.drink(player, 2, 1);
-            ColdSweatCompat.applyWarmth(player, 0.2D);
+            ThirstSystem.drink(player, 2, 1);
+            TemperatureSystem.applyWarmth(player, 0.2D);
         }
         return result;
     }
@@ -51,12 +51,8 @@ public class SteamRationItem extends Item {
     @Override
     public void appendHoverText(ItemStack stack, Level level, List<Component> tooltip, TooltipFlag flag) {
         tooltip.add(Component.translatable("item.createsurvival.steam_ration.tooltip").withStyle(ChatFormatting.GRAY));
-        if (ColdSweatCompat.isLoaded()) {
-            tooltip.add(Component.translatable("item.createsurvival.steam_ration.tooltip.coldsweat").withStyle(ChatFormatting.AQUA));
-        }
-        if (ThirstCompat.isLoaded()) {
-            tooltip.add(Component.translatable("item.createsurvival.steam_ration.tooltip.thirst").withStyle(ChatFormatting.BLUE));
-        }
+        ThirstSystem.appendHydrationTooltip(tooltip);
+        tooltip.add(Component.translatable("item.createsurvival.steam_ration.tooltip.temperature").withStyle(ChatFormatting.AQUA));
     }
 
     @Override

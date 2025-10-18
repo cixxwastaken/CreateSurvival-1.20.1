@@ -1,6 +1,6 @@
 package com.cixxyt.createsurvival.content.items;
 
-import com.cixxyt.createsurvival.compat.coldsweat.ColdSweatCompat;
+import com.cixxyt.createsurvival.systems.TemperatureSystem;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 import net.minecraft.stats.Stats;
@@ -15,8 +15,8 @@ import net.minecraft.world.level.Level;
 import java.util.List;
 
 /**
- * Utility item that reports the local temperature.  When Cold Sweat is present we surface its
- * exact readings; otherwise the thermometer gives advice based on vanilla biome temperature.
+ * Utility item that reports the local temperature through the bespoke survival telemetry.  The
+ * tooltip still falls back to biome cues when the player needs quick at-a-glance advice.
  */
 public class SurveyorThermometerItem extends Item {
     public SurveyorThermometerItem(Properties properties) {
@@ -27,7 +27,7 @@ public class SurveyorThermometerItem extends Item {
     public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand hand) {
         ItemStack stack = player.getItemInHand(hand);
         if (!level.isClientSide()) {
-            Component readout = ColdSweatCompat.describeTemperature(player, level);
+            Component readout = TemperatureSystem.describeTemperature(player, level);
             player.displayClientMessage(readout, true);
             player.awardStat(Stats.ITEM_USED.get(this));
         }
@@ -37,8 +37,6 @@ public class SurveyorThermometerItem extends Item {
     @Override
     public void appendHoverText(ItemStack stack, Level level, List<Component> tooltip, TooltipFlag flag) {
         tooltip.add(Component.translatable("item.createsurvival.surveyor_thermometer.tooltip").withStyle(ChatFormatting.GRAY));
-        if (ColdSweatCompat.isLoaded()) {
-            tooltip.add(Component.translatable("item.createsurvival.surveyor_thermometer.tooltip.coldsweat").withStyle(ChatFormatting.AQUA));
-        }
+        tooltip.add(Component.translatable("item.createsurvival.surveyor_thermometer.tooltip.temperature").withStyle(ChatFormatting.AQUA));
     }
 }
