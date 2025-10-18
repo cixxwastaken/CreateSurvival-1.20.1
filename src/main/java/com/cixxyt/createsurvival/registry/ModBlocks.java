@@ -1,6 +1,7 @@
 package com.cixxyt.createsurvival.registry;
 
 import com.cixxyt.createsurvival.CreateSurvivalMod;
+import com.cixxyt.createsurvival.content.blocks.GyrothermalRegulatorBlock;
 import com.cixxyt.createsurvival.content.blocks.MechanicalLampBlock;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.SoundType;
@@ -35,6 +36,18 @@ public final class ModBlocks {
                     .mapColor(MapColor.METAL)
                     .strength(3.0F, 6.0F)
                     .sound(SoundType.LANTERN)));
+
+    /**
+     * A kinetic climate controller that translates shaft direction into heating or cooling.  The
+     * block deliberately advertises its shaft on the front face only so students can reason about
+     * speed sign (positive vs. negative) while experimenting with Create gearboxes and clutches.
+     */
+    public static final RegistryObject<Block> GYROTHERMAL_REGULATOR = BLOCKS.register("gyrothermal_regulator",
+            () -> new GyrothermalRegulatorBlock(BlockBehaviour.Properties.of()
+                    .mapColor(MapColor.COLOR_LIGHT_BLUE)
+                    .strength(3.0F, 6.0F)
+                    .sound(SoundType.COPPER)
+                    .noOcclusion()));
 
     /** Hooked by the mod constructor so Forge can process the block registry. */
     public static void register(IEventBus eventBus) {

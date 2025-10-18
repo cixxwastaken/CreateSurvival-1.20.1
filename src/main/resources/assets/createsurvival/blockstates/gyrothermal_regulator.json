@@ -1,0 +1,8 @@
+{
+  "variants": {
+    "facing=north": { "model": "createsurvival:block/gyrothermal_regulator" },
+    "facing=south": { "model": "createsurvival:block/gyrothermal_regulator", "y": 180 },
+    "facing=west": { "model": "createsurvival:block/gyrothermal_regulator", "y": 270 },
+    "facing=east": { "model": "createsurvival:block/gyrothermal_regulator", "y": 90 }
+  }
+}

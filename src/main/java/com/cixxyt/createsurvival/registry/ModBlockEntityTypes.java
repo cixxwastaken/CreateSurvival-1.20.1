@@ -1,6 +1,7 @@
 package com.cixxyt.createsurvival.registry;
 
 import com.cixxyt.createsurvival.CreateSurvivalMod;
+import com.cixxyt.createsurvival.content.blocks.entity.GyrothermalRegulatorBlockEntity;
 import com.cixxyt.createsurvival.content.blocks.entity.MechanicalLampBlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraftforge.eventbus.api.IEventBus;
@@ -31,6 +32,16 @@ public final class ModBlockEntityTypes {
             BLOCK_ENTITY_TYPES.register("mechanical_lamp",
                     () -> BlockEntityType.Builder.of(MechanicalLampBlockEntity::new,
                             ModBlocks.MECHANICAL_LAMP.get()).build(null));
+
+    /**
+     * The gyrothermal regulator consumes rotation and produces temperature comfort, so we register
+     * its block entity alongside the lamp.  The supplier references the block registration lazily,
+     * which keeps everything safe even though Forge wires blocks before block entities.
+     */
+    public static final RegistryObject<BlockEntityType<GyrothermalRegulatorBlockEntity>> GYROTHERMAL_REGULATOR =
+            BLOCK_ENTITY_TYPES.register("gyrothermal_regulator",
+                    () -> BlockEntityType.Builder.of(GyrothermalRegulatorBlockEntity::new,
+                            ModBlocks.GYROTHERMAL_REGULATOR.get()).build(null));
 
     public static void register(IEventBus eventBus) {
         BLOCK_ENTITY_TYPES.register(eventBus);
