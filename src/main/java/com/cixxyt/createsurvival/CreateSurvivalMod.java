@@ -4,6 +4,7 @@ import com.cixxyt.createsurvival.compat.coldsweat.ColdSweatCompat;
 import com.cixxyt.createsurvival.compat.create.CreateCompat;
 import com.cixxyt.createsurvival.compat.thirst.ThirstCompat;
 import com.cixxyt.createsurvival.registry.ModBlocks;
+import com.cixxyt.createsurvival.registry.ModCreativeTabs;
 import com.cixxyt.createsurvival.registry.ModItems;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.fml.ModList;
@@ -31,6 +32,7 @@ public class CreateSurvivalMod {
         // Having the calls here keeps our startup order deterministic and easy to follow.
         ModItems.register(modEventBus);
         ModBlocks.register(modEventBus);
+        ModCreativeTabs.register(modEventBus);
 
         // Optional integration bootstraps.  Each helper double-checks that the companion mod is
         // really available before touching any of its classes, preventing class-loading crashes
