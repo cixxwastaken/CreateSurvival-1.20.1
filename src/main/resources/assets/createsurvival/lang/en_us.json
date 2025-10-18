@@ -18,6 +18,8 @@
   "item.createsurvival.thermo_vest": "Thermo-Regulated Vest",
   "item.createsurvival.thermo_vest.tooltip": "Kinetic padding soaks environmental extremes like an automatic coat.",
   "item.createsurvival.thermo_vest.tooltip.coldsweat": "Actively balances Cold Sweat body temperature while powered by motion.",
+  "block.createsurvival.mechanical_lamp": "Mechanical Lamp",
+  "block.createsurvival.mechanical_lamp.tooltip": "Shines brighter as Create's shafts spin faster beneath it.",
   "tooltip.createsurvival.purity_level": "Purity Tier %s",
   "tooltip.createsurvival.temperature.cold": "Bundle up!",
   "tooltip.createsurvival.temperature.hot": "Stay hydrated!"
