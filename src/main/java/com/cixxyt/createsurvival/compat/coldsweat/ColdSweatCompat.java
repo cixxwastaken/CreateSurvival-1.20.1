@@ -4,10 +4,13 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.core.BlockPos;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.phys.AABB;
 import net.minecraftforge.registries.ForgeRegistries;
 
 import java.lang.reflect.Method;
@@ -143,6 +146,52 @@ public final class ColdSweatCompat {
             descriptor.append(Component.literal(" ").append(Component.translatable("tooltip.createsurvival.temperature.hot")).withStyle(ChatFormatting.RED));
         }
         return descriptor;
+    }
+
+    /**
+     * Applies a gentle heating aura around the supplied position.  Each nearby player is given the
+     * chance to benefit from Cold Sweat's temperature system; when the integration is absent we
+     * instead award a small burst of vanilla regeneration so the block still feels rewarding.
+     */
+    public static void applyAmbientWarmth(Level level, BlockPos origin, double strength, double radius) {
+        if (level == null || origin == null) {
+            return;
+        }
+
+        AABB area = new AABB(origin).inflate(Math.max(1.0D, radius));
+        boolean coldSweatPresent = loaded;
+        int duration = (int) Math.ceil(20 * Math.max(4.0D, strength * 6.0D));
+
+        for (Player player : level.getEntitiesOfClass(Player.class, area)) {
+            boolean applied = applyWarmth(player, strength);
+            if (!coldSweatPresent && player != null) {
+                player.addEffect(new MobEffectInstance(MobEffects.REGENERATION, duration, 0, true, true));
+            } else if (!applied && coldSweatPresent) {
+                // Cold Sweat already applies its own comfort effect through {@link #applyWarmth} when
+                // the temperature delta fails, so we simply avoid stacking an extra vanilla potion.
+            }
+        }
+    }
+
+    /** Mirrors {@link #applyAmbientWarmth(Level, BlockPos, double, double)} but for cooling. */
+    public static void applyAmbientCooling(Level level, BlockPos origin, double strength, double radius) {
+        if (level == null || origin == null) {
+            return;
+        }
+
+        AABB area = new AABB(origin).inflate(Math.max(1.0D, radius));
+        boolean coldSweatPresent = loaded;
+        int duration = (int) Math.ceil(20 * Math.max(4.0D, strength * 6.0D));
+
+        for (Player player : level.getEntitiesOfClass(Player.class, area)) {
+            boolean applied = applyCooling(player, strength);
+            if (!coldSweatPresent && player != null) {
+                player.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SPEED, duration, 0, true, true));
+            } else if (!applied && coldSweatPresent) {
+                // As with heating, Cold Sweat already attached its own effect when the reflection
+                // call failed, so we let that stand without doubling up on vanilla particles.
+            }
+        }
     }
 
     private static boolean applyTemperatureDelta(Player player, double delta) {
