@@ -1,6 +1,12 @@
 package com.cixxyt.createsurvival.compat.thirst;
 
 import net.minecraft.core.BlockPos;
+//<<<<<<< codex/fix-crashing-errors-related-to-tooltip-828nej
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.network.chat.TextColor;
+//=======
+//>>>>>>> master
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
@@ -9,6 +15,7 @@ import net.minecraftforge.common.util.LazyOptional;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.util.List;
 
 public class ThirstCompat {
 
@@ -21,6 +28,10 @@ public class ThirstCompat {
     private static Method addPurityMethod;
     private static Method getBlockPurityMethod;
     private static Method givePurityEffectsMethod;
+//<<<<<<< codex/fix-crashing-errors-related-to-tooltip-828nej
+    private static Method appendPurityTooltipMethod;
+//=======
+//>>>>>>> master
 
     public static boolean isLoaded() {
         return loaded;
@@ -37,12 +48,29 @@ public class ThirstCompat {
 
             Class<?> waterPurityClass = Class.forName("dev.ghen.thirst.content.purity.WaterPurity");
             getPurityMethod = waterPurityClass.getMethod("getPurity", ItemStack.class);
+//<<<<<<< codex/fix-crashing-errors-related-to-tooltip-828nej
+            try {
+                getPurityTextMethod = waterPurityClass.getMethod("getPurityText", int.class);
+            } catch (NoSuchMethodException ignored) {
+                getPurityTextMethod = null;
+            }
+//=======
             getPurityTextMethod = waterPurityClass.getMethod("getPurityText", int.class);
+//>>>>>>> master
             getPurityColorMethod = waterPurityClass.getMethod("getPurityColor", int.class);
             addPurityMethod = waterPurityClass.getMethod("addPurity", ItemStack.class, int.class);
             getBlockPurityMethod = waterPurityClass.getMethod("getBlockPurity", Level.class, BlockPos.class);
             givePurityEffectsMethod = waterPurityClass.getMethod("givePurityEffects", Player.class, int.class);
 
+//<<<<<<< codex/fix-crashing-errors-related-to-tooltip-828nej
+            try {
+                appendPurityTooltipMethod = waterPurityClass.getMethod("appendTooltip", ItemStack.class, List.class);
+            } catch (NoSuchMethodException ignored) {
+                appendPurityTooltipMethod = null;
+            }
+
+//=======
+//>>>>>>> master
             loaded = true;
         } catch (Exception e) {
             clearReflection();
@@ -59,6 +87,10 @@ public class ThirstCompat {
         addPurityMethod = null;
         getBlockPurityMethod = null;
         givePurityEffectsMethod = null;
+//<<<<<<< codex/fix-crashing-errors-related-to-tooltip-828nej
+        appendPurityTooltipMethod = null;
+//=======
+//>>>>>>> master
     }
 
     public static void drink(Player player, int thirst, int quenched) {
@@ -95,6 +127,57 @@ public class ThirstCompat {
         return 0;
     }
 
+//<<<<<<< codex/fix-crashing-errors-related-to-tooltip-828nej
+    public static Component getPurityComponent(int purity) {
+        if (!loaded) {
+            return Component.literal("Unknown");
+        }
+
+        try {
+            if (getPurityTextMethod != null) {
+                Object result = getPurityTextMethod.invoke(null, purity);
+                if (result instanceof Component component) {
+                    return component;
+                }
+                if (result != null) {
+                    return Component.literal(result.toString());
+                }
+            }
+        } catch (Exception ignored) {}
+        return Component.literal("Unknown");
+    }
+
+    public static int getPurityColor(int purity) {
+        if (!loaded || getPurityColorMethod == null) {
+            return 0xFFFFFF;
+        }
+
+        try {
+            Object result = getPurityColorMethod.invoke(null, purity);
+            if (result instanceof Number number) {
+                return number.intValue();
+            }
+        } catch (Exception ignored) {}
+        return 0xFFFFFF;
+    }
+
+    public static void givePurityEffects(Player player, int purity) {
+        if (!loaded || givePurityEffectsMethod == null) {
+            return;
+        }
+
+        try {
+            givePurityEffectsMethod.invoke(null, player, purity);
+        } catch (Exception ignored) {}
+    }
+
+    public static void applyBlockPurity(ItemStack stack, Level level, BlockPos pos) {
+        if (!loaded || addPurityMethod == null || getBlockPurityMethod == null) {
+            return;
+        }
+
+        try {
+//=======
     public static String getPurityText(int purity) {
         if (!loaded || getPurityTextMethod == null) {
             return "Unknown";
@@ -139,10 +222,36 @@ public class ThirstCompat {
         }
 
         try {
+//>>>>>>> master
             Object result = getBlockPurityMethod.invoke(null, level, pos);
             if (result instanceof Number number) {
                 addPurityMethod.invoke(null, stack, number.intValue());
             }
         } catch (Exception ignored) {}
+    }
+
+    public static void appendPurityTooltip(ItemStack stack, List<Component> tooltip) {
+        if (tooltip == null) {
+            return;
+        }
+
+        if (!loaded) {
+            return;
+        }
+
+        try {
+            if (appendPurityTooltipMethod != null) {
+                appendPurityTooltipMethod.invoke(null, stack, tooltip);
+                return;
+            }
+        } catch (Exception ignored) {
+            // Fallback to manual tooltip below
+        }
+
+        int purity = getPurity(stack);
+        Component purityText = getPurityComponent(purity);
+        int color = getPurityColor(purity) & 0xFFFFFF;
+        MutableComponent component = Component.literal("Purity: ").append(purityText.copy());
+        tooltip.add(component.withStyle(style -> style.withColor(TextColor.fromRgb(color))));
     }
 }
