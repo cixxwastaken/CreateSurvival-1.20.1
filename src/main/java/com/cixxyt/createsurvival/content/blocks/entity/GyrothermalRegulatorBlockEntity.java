@@ -154,21 +154,25 @@ public class GyrothermalRegulatorBlockEntity extends KineticBlockEntity {
         if (level == null || level.isClientSide) {
             return;
         }
+        // Smart block entities expose sendData(), which wraps the boilerplate for dispatching a
+        // ClientboundBlockEntityDataPacket.  We still call setChanged() so the chunk saves the new
+        // fields the next time it serializes to disk.
         setChanged();
+        sendData();
         level.sendBlockUpdated(getBlockPos(), getBlockState(), getBlockState(), Block.UPDATE_CLIENTS);
     }
 
     @Override
-    protected void saveAdditional(CompoundTag tag) {
-        super.saveAdditional(tag);
+    protected void write(CompoundTag tag, boolean clientPacket) {
+        super.write(tag, clientPacket);
         tag.putString("Mode", mode.name());
         tag.putDouble("Intensity", intensity);
         tag.putDouble("Strength", lastAppliedStrength);
     }
 
     @Override
-    public void load(CompoundTag tag) {
-        super.load(tag);
+    protected void read(CompoundTag tag, boolean clientPacket) {
+        super.read(tag, clientPacket);
         if (tag.contains("Mode")) {
             try {
                 mode = Mode.valueOf(tag.getString("Mode"));
@@ -188,12 +192,20 @@ public class GyrothermalRegulatorBlockEntity extends KineticBlockEntity {
     @Nullable
     @Override
     public ClientboundBlockEntityDataPacket getUpdatePacket() {
+        // create(this) asks SmartBlockEntity to call write(tag, true), giving us the same fields we
+        // teach in read(..., true) below.  This is the standard Create pattern for syncing custom
+        // state to the client renderer.
         return ClientboundBlockEntityDataPacket.create(this);
     }
 
     @Override
     public void onDataPacket(Connection net, ClientboundBlockEntityDataPacket packet) {
-        load(packet.getTag());
+        CompoundTag tag = packet.getTag();
+        if (tag != null) {
+            // The boolean flag tells our read method this data flowed over the network, prompting it
+            // to update only transient client fields if we ever add them in the future.
+            read(tag, true);
+        }
     }
 
     /**
