@@ -79,7 +79,10 @@ public class GyrothermalRegulatorBlock extends HorizontalKineticBlock implements
         // The ticker hands off to specialized static methods on the block entity so we can keep
         // server-only thermal logic separate from client visualizations.  Forge will call both
         // tickers every tick, but each routine immediately ignores the wrong side.
-        return createTickerHelper(type, ModBlockEntityTypes.GYROTHERMAL_REGULATOR.get(),
+        // IBE exposes a convenience helper that only wires the ticker when the looked-up type
+        // matches our block entity type.  Passing the level and state keeps Create's safety checks
+        // intact while our ternary picks the appropriate side-specific tick routine.
+        return IBE.createTickerHelper(level, state, type, ModBlockEntityTypes.GYROTHERMAL_REGULATOR.get(),
                 level.isClientSide ? GyrothermalRegulatorBlockEntity::clientTick : GyrothermalRegulatorBlockEntity::serverTick);
     }
 
