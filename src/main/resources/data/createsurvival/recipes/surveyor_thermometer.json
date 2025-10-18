@@ -1,0 +1,22 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "conditions": [
+    {
+      "type": "forge:mod_loaded",
+      "modid": "create"
+    }
+  ],
+  "pattern": [
+    " AB",
+    " CA",
+    " AB"
+  ],
+  "key": {
+    "A": { "item": "create:brass_sheet" },
+    "B": { "item": "create:cogwheel" },
+    "C": { "item": "minecraft:compass" }
+  },
+  "result": {
+    "item": "createsurvival:surveyor_thermometer"
+  }
+}

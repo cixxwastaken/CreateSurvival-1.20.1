@@ -1,0 +1,23 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "conditions": [
+    {
+      "type": "forge:mod_loaded",
+      "modid": "create"
+    }
+  ],
+  "pattern": [
+    " BC",
+    "BA ",
+    " BC"
+  ],
+  "key": {
+    "A": { "item": "create:fluid_tank" },
+    "B": { "item": "create:brass_sheet" },
+    "C": { "item": "minecraft:glass_bottle" }
+  },
+  "result": {
+    "item": "createsurvival:steam_canister",
+    "count": 2
+  }
+}

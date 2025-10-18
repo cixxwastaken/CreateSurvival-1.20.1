@@ -1,0 +1,22 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "conditions": [
+    {
+      "type": "forge:mod_loaded",
+      "modid": "create"
+    }
+  ],
+  "pattern": [
+    "A A",
+    "BCB",
+    "ACA"
+  ],
+  "key": {
+    "A": { "item": "create:brass_sheet" },
+    "B": { "item": "minecraft:leather_chestplate" },
+    "C": { "item": "create:andesite_alloy" }
+  },
+  "result": {
+    "item": "createsurvival:thermo_vest"
+  }
+}
