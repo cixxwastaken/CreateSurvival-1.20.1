@@ -63,6 +63,14 @@ public class MechanicalLampBlock extends RotatedPillarKineticBlock implements IB
     }
 
     @Override
+    public Direction.Axis getRotationAxis(BlockState state) {
+        // Create's kinetic graph repeatedly asks for the axis so it knows how to feed mechanical
+        // stress through this block.  Returning the stored pillar axis keeps rotations aligned with
+        // however the player oriented the lamp during placement.
+        return state.getValue(AXIS);
+    }
+
+    @Override
     public Class<MechanicalLampBlockEntity> getBlockEntityClass() {
         return MechanicalLampBlockEntity.class;
     }
