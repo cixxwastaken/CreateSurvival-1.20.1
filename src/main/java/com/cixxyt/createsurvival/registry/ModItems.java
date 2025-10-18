@@ -6,13 +6,21 @@ import com.cixxyt.createsurvival.content.items.SteamCanisterItem;
 import com.cixxyt.createsurvival.content.items.SteamRationItem;
 import com.cixxyt.createsurvival.content.items.SurveyorThermometerItem;
 import com.cixxyt.createsurvival.content.items.ThermoVestItem;
-import net.minecraft.world.item.Item;
+import net.minecraft.ChatFormatting;
+import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.BlockItem;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.TooltipFlag;
+import net.minecraft.world.level.Level;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.registries.RegistryObject;
+
+import javax.annotation.Nullable;
+import java.util.List;
 
 /**
  * Master item registry.  Each {@link RegistryObject} lazily constructs the item when Forge asks
@@ -32,6 +40,20 @@ public final class ModItems {
      */
     public static final RegistryObject<Item> MECHANICAL_LAMP = ITEMS.register("mechanical_lamp",
             () -> new BlockItem(ModBlocks.MECHANICAL_LAMP.get(), new Item.Properties()));
+
+    /**
+     * The regulator's block item includes a tooltip so students remember which Create tools affect
+     * its output.  Anonymous subclassing keeps the registration succinct while still allowing us to
+     * inject professor-style commentary.
+     */
+    public static final RegistryObject<Item> GYROTHERMAL_REGULATOR = ITEMS.register("gyrothermal_regulator",
+            () -> new BlockItem(ModBlocks.GYROTHERMAL_REGULATOR.get(), new Item.Properties()) {
+                @Override
+                public void appendHoverText(ItemStack stack, @Nullable Level level, List<Component> tooltip, TooltipFlag flag) {
+                    tooltip.add(Component.translatable("tooltip.createsurvival.gyrothermal_regulator").withStyle(ChatFormatting.GRAY));
+                    tooltip.add(Component.translatable("tooltip.createsurvival.gyrothermal_regulator.controls").withStyle(ChatFormatting.AQUA));
+                }
+            });
 
     public static final RegistryObject<Item> CLOCKWORK_CANTEEN = ITEMS.register("clockwork_canteen",
             () -> new ClockworkCanteenItem(new Item.Properties()));
