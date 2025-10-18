@@ -1,5 +1,10 @@
 package com.cixxyt.createsurvival.content.items;
 
+//<<<<<<< codex/fix-crashing-errors-related-to-tooltip-828nej
+//=======
+import com.cixxyt.createsurvival.compat.thirst.ThirstCompat;
+import com.cixxyt.createsurvival.registry.ModItems;
+//>>>>>>> master
 import net.minecraft.core.BlockPos;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
@@ -25,10 +30,22 @@ public class FlaskItem extends Item {
     @Override
     public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand hand) {
         ItemStack stack = player.getItemInHand(hand);
+//<<<<<<< codex/fix-crashing-errors-related-to-tooltip-828nej
         HitResult hitResult = getPlayerPOVHitResult(level, player, ClipContext.Fluid.SOURCE_ONLY);
         if (hitResult.getType() != HitResult.Type.BLOCK) {
             return InteractionResultHolder.pass(stack);
         }
+//=======
+        BlockPos pos = player.blockPosition();
+
+        if (!level.isClientSide && level.getFluidState(pos).isSource() && level.getFluidState(pos).getType() == Fluids.WATER) {
+            // Create filled flask
+            ItemStack filled = new ItemStack(ModItems.FLASK_WATER.get());
+            filled.getOrCreateTag().putInt("SipsLeft", 5);
+
+            // Add purity if the Thirst mod is available
+            ThirstCompat.applyBlockPurity(filled, level, pos);
+//>>>>>>> master
 
         BlockHitResult blockHit = (BlockHitResult) hitResult;
         BlockPos pos = blockHit.getBlockPos();

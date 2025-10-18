@@ -2,7 +2,10 @@ package com.cixxyt.createsurvival.content.items;
 
 import com.cixxyt.createsurvival.compat.thirst.ThirstCompat;
 import com.cixxyt.createsurvival.registry.ModItems;
+//<<<<<<< codex/fix-crashing-errors-related-to-tooltip-828nej
 import net.minecraft.core.BlockPos;
+//=======
+//>>>>>>> master
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TextColor;
 import net.minecraft.world.InteractionHand;
@@ -23,6 +26,7 @@ public class FlaskItemWater extends Item {
 
     public FlaskItemWater(Properties properties) {
         super(properties);
+//<<<<<<< codex/fix-crashing-errors-related-to-tooltip-828nej
     }
 
     public static ItemStack createFilledStack(Level level, BlockPos sourcePos) {
@@ -47,6 +51,8 @@ public class FlaskItemWater extends Item {
         if (!stack.hasTag() || !stack.getTag().contains(SIPS_TAG)) {
             setSips(stack, DEFAULT_SIPS);
         }
+//=======
+//>>>>>>> master
     }
 
     @Override
@@ -77,6 +83,11 @@ public class FlaskItemWater extends Item {
             ThirstCompat.drink(player, 2, 1);
         }
 
+//<<<<<<< codex/fix-crashing-errors-related-to-tooltip-828nej
+//=======
+        // Check purity effects
+        int purity = ThirstCompat.getPurity(stack);
+//>>>>>>> master
         ThirstCompat.givePurityEffects(player, purity);
 
         if (!player.getAbilities().instabuild) {
@@ -91,6 +102,7 @@ public class FlaskItemWater extends Item {
     }
 
     @Override
+//<<<<<<< codex/fix-crashing-errors-related-to-tooltip-828nej
     public void appendHoverText(ItemStack stack, Level level, List<Component> tooltip, net.minecraft.world.item.TooltipFlag flag) {
         ensureSipsTag(stack);
         int sips = getSips(stack);
@@ -99,5 +111,17 @@ public class FlaskItemWater extends Item {
         ThirstCompat.appendPurityTooltip(stack, tooltip);
 
         super.appendHoverText(stack, level, tooltip, flag);
+//=======
+    public void appendHoverText(ItemStack stack, Level level, java.util.List<Component> tooltip, net.minecraft.world.item.TooltipFlag flag) {
+        int sips = stack.getOrCreateTag().getInt("SipsLeft");
+        tooltip.add(Component.literal("Sips left: " + sips).withStyle(style -> style.withColor(TextColor.fromRgb(0xFFFFFF))));
+
+        if (ThirstCompat.isLoaded()) {
+            int purity = ThirstCompat.getPurity(stack);
+            String purityText = ThirstCompat.getPurityText(purity);
+            int color = ThirstCompat.getPurityColor(purity);
+            tooltip.add(Component.literal("Purity: " + purityText).withStyle(style -> style.withColor(TextColor.fromRgb(color))));
+        }
+//>>>>>>> master
     }
 }
