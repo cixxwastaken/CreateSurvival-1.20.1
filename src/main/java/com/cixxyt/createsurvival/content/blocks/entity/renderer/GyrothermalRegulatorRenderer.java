@@ -36,7 +36,7 @@ public class GyrothermalRegulatorRenderer implements BlockEntityRenderer<Gyrothe
                        MultiBufferSource buffer, int packedLight, int packedOverlay) {
         float angle = blockEntity.getRotorAngle(partialTicks);
         drawRotor(blockEntity, poseStack, buffer, angle);
-        renderShaft(blockEntity, poseStack, buffer, packedLight, packedOverlay, angle);
+                                                         renderShaft(blockEntity, poseStack, buffer, packedLight, packedOverlay, angle);
     }
 
     private void drawRotor(GyrothermalRegulatorBlockEntity blockEntity, PoseStack poseStack,
