@@ -9,12 +9,10 @@ import net.minecraft.core.Direction;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelReader;
-import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityTicker;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.block.state.StateDefinition;
 
 import javax.annotation.Nullable;
 
@@ -33,13 +31,11 @@ public class GyrothermalRegulatorBlock extends HorizontalKineticBlock implements
         // Default new placements so that the exposed shaft faces the player.  This mirrors how
         // Create's own kinetic blocks behave and prevents accidental backwards installations when
         // a student is first experimenting with rotational power flows.
+        // HorizontalKineticBlock already wires in the HORIZONTAL_FACING property, so we only adjust
+        // the default orientation here.  Students sometimes attempt to re-register the property and
+        // run into Forge's "duplicate property" crash; leaving the configuration in the constructor
+        // highlights that the base class has already done the heavy lifting for us.
         this.registerDefaultState(this.defaultBlockState().setValue(HORIZONTAL_FACING, Direction.SOUTH));
-    }
-
-    @Override
-    protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
-        super.createBlockStateDefinition(builder);
-        builder.add(HORIZONTAL_FACING);
     }
 
     @Nullable
