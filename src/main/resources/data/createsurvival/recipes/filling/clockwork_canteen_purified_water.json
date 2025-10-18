@@ -15,7 +15,7 @@
       "item": "createsurvival:clockwork_canteen"
     },
     {
-      "fluid": "thirst:purified_water",
+      "fluid": "minecraft:water",
       "amount": 1000
     }
   ],
