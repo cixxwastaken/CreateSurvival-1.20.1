@@ -10,6 +10,7 @@ import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Rarity;
+import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.item.UseAnim;
 import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.Level;
@@ -90,7 +91,7 @@ public class ClockworkCanteenItem extends Item {
     }
 
     @Override
-    public void appendHoverText(ItemStack stack, Item.TooltipContext context, List<Component> tooltip, net.minecraft.world.item.TooltipFlag flag) {
+    public void appendHoverText(ItemStack stack, Level level, List<Component> tooltip, TooltipFlag flag) {
         int sips = getSips(stack);
         tooltip.add(Component.translatable("item.createsurvival.clockwork_canteen.sips", sips, MAX_SIPS).withStyle(ChatFormatting.GRAY));
         ThirstCompat.appendPurityTooltip(stack, tooltip);
@@ -101,8 +102,6 @@ public class ClockworkCanteenItem extends Item {
             }
         }
     }
-
-    
 
     @Override
     public boolean isBarVisible(ItemStack stack) {
