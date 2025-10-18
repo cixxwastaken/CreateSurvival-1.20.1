@@ -78,13 +78,22 @@ public class GyrothermalRegulatorBlock extends HorizontalKineticBlock implements
     public <T extends BlockEntity> BlockEntityTicker<T> getTicker(Level level, BlockState state, BlockEntityType<T> type) {
         // The ticker hands off to specialized static methods on the block entity so we can keep
         // server-only thermal logic separate from client visualizations.  Forge will call both
-        // tickers every tick, but each routine immediately ignores the wrong side.
-        // IBE exposes a convenience helper that only wires the ticker when the looked-up type
-        // matches our block entity type.  The Create 1.20 API accepts just the queried type, our
-        // own block entity type, and the ticker to install—so we let the helper perform its
-        // identity check while our ternary chooses the side-specific routine.
-        return IBE.createTickerHelper(type, ModBlockEntityTypes.GYROTHERMAL_REGULATOR.get(),
-                level.isClientSide ? GyrothermalRegulatorBlockEntity::clientTick : GyrothermalRegulatorBlockEntity::serverTick);
+        // tickers every tick, but each routine immediately ignores the wrong side.  Rather than
+        // relying on Create's overload-specific helper (which changed signatures between minor
+        // versions), we perform the type guard manually so the compiler remains satisfied on 1.20.1
+        // Forge.  Doing it ourselves makes the flow obvious to students studying the call graph and
+        // avoids surprises if Create tweaks its utility APIs in the future.
+        if (type == ModBlockEntityTypes.GYROTHERMAL_REGULATOR.get()) {
+            // Once we confirm the queried type actually matches our block entity we can safely return
+            // the side-appropriate ticker.  The explicit cast looks scary, but Forge guarantees it will
+            // only ever invoke the callback on instances of our block entity when the type check passes.
+            @SuppressWarnings("unchecked")
+            BlockEntityTicker<T> ticker = (BlockEntityTicker<T>) (level.isClientSide
+                    ? GyrothermalRegulatorBlockEntity::clientTick
+                    : GyrothermalRegulatorBlockEntity::serverTick);
+            return ticker;
+        }
+        return null;
     }
 
     @Override
