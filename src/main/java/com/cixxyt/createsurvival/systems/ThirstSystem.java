@@ -15,7 +15,6 @@ import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.level.material.Fluids;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.LogicalSide;
 
 import java.util.List;
@@ -167,37 +166,39 @@ public final class ThirstSystem {
     }
 
     /**
-     * Event listener container so we can register the logic without resorting to static annotations.
+     * Called when Forge clones a player entity (for example after respawn).  We copy over the thirst
+     * payload so students can see how persistent player data survives death without needing
+     * capabilities.
      */
-    public static final class PlayerHooks {
-        @SubscribeEvent
-        public void clone(PlayerEvent.Clone event) {
-            if (event.isWasDeath()) {
-                copyData(event.getOriginal(), event.getEntity());
-            }
+    public static void handlePlayerClone(PlayerEvent.Clone event) {
+        if (event.isWasDeath()) {
+            copyData(event.getOriginal(), event.getEntity());
         }
+    }
 
-        @SubscribeEvent
-        public void onPlayerTick(TickEvent.PlayerTickEvent event) {
-            if (event.side != LogicalSide.SERVER || event.phase != TickEvent.Phase.END) {
-                return;
-            }
-            Player player = event.player;
-            CompoundTag root = getOrCreateRoot(player);
-            int timer = root.getInt(TAG_TIMER) + 1;
-            if (timer >= TICKS_PER_SIP) {
-                timer = 0;
-                int current = Math.max(0, getThirst(player) - 1);
-                setThirst(player, current);
-                if (current <= 0) {
-                    // Using starvation damage mirrors vanilla hunger while reinforcing hydration.
-                    player.hurt(player.damageSources().starve(), 1.0F);
-                } else if (current <= DANGER_THRESHOLD) {
-                    player.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 20 * 4, 0, true, true));
-                    player.addEffect(new MobEffectInstance(MobEffects.WEAKNESS, 20 * 4, 0, true, true));
-                }
-            }
-            root.putInt(TAG_TIMER, timer);
+    /**
+     * Server tick handler that drains thirst over time and applies penalties.  Registering this as a
+     * direct consumer keeps the call-site in {@link SurvivalSystems} extremely explicit.
+     */
+    public static void handlePlayerTick(TickEvent.PlayerTickEvent event) {
+        if (event.side != LogicalSide.SERVER || event.phase != TickEvent.Phase.END) {
+            return;
         }
+        Player player = event.player;
+        CompoundTag root = getOrCreateRoot(player);
+        int timer = root.getInt(TAG_TIMER) + 1;
+        if (timer >= TICKS_PER_SIP) {
+            timer = 0;
+            int current = Math.max(0, getThirst(player) - 1);
+            setThirst(player, current);
+            if (current <= 0) {
+                // Using starvation damage mirrors vanilla hunger while reinforcing hydration.
+                player.hurt(player.damageSources().starve(), 1.0F);
+            } else if (current <= DANGER_THRESHOLD) {
+                player.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 20 * 4, 0, true, true));
+                player.addEffect(new MobEffectInstance(MobEffects.WEAKNESS, 20 * 4, 0, true, true));
+            }
+        }
+        root.putInt(TAG_TIMER, timer);
     }
 }

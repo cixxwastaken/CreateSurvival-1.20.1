@@ -15,7 +15,6 @@ import net.minecraft.world.level.LightLayer;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.LogicalSide;
 
 /**
@@ -179,48 +178,50 @@ public final class TemperatureSystem {
     }
 
     /**
-     * Listener bucket registered via {@link SurvivalSystems}.  We keep the class lightweight so the
-     * registration site shows exactly which hooks are wired.
+     * Mirrors {@link ThirstSystem#handlePlayerClone(PlayerEvent.Clone)} so both systems preserve
+     * their state across respawns.  Students can compare the two implementations to reinforce their
+     * understanding of persistent NBT.
      */
-    public static final class PlayerHooks {
-        @SubscribeEvent
-        public void clone(PlayerEvent.Clone event) {
-            if (event.isWasDeath()) {
-                copyData(event.getOriginal(), event.getEntity());
-            }
+    public static void handlePlayerClone(PlayerEvent.Clone event) {
+        if (event.isWasDeath()) {
+            copyData(event.getOriginal(), event.getEntity());
+        }
+    }
+
+    /**
+     * Server tick hook that samples the environment, drifts body temperature toward equilibrium, and
+     * applies gameplay consequences.  Keeping the method static underlines that no per-player objects
+     * are required for deterministic survival logic.
+     */
+    public static void handlePlayerTick(TickEvent.PlayerTickEvent event) {
+        if (event.side != LogicalSide.SERVER || event.phase != TickEvent.Phase.END) {
+            return;
+        }
+        Player player = event.player;
+        Level level = player.level();
+        BlockPos pos = player.blockPosition();
+        double worldTemp = sampleWorldTemperature(level, pos);
+        setWorldTemperature(player, worldTemp);
+
+        double body = getBodyTemperature(player);
+        double towardWorld = Mth.lerp(0.05D, body, worldTemp);
+        setBodyTemperature(player, towardWorld);
+
+        // Provide tangible penalties or bonuses based on the new temperature values.
+        if (Math.abs(towardWorld) <= COMFORT_BAND) {
+            player.addEffect(new MobEffectInstance(MobEffects.DIG_SPEED, 40, 0, true, false));
+        } else if (towardWorld > EXTREME_THRESHOLD) {
+            player.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 40, 1, true, true));
+            player.addEffect(new MobEffectInstance(MobEffects.WEAKNESS, 40, 0, true, true));
+        } else if (towardWorld < -EXTREME_THRESHOLD) {
+            player.addEffect(new MobEffectInstance(MobEffects.DIG_SLOWDOWN, 40, 1, true, true));
+            player.addEffect(new MobEffectInstance(MobEffects.HUNGER, 40, 0, true, true));
         }
 
-        @SubscribeEvent
-        public void onPlayerTick(TickEvent.PlayerTickEvent event) {
-            if (event.side != LogicalSide.SERVER || event.phase != TickEvent.Phase.END) {
-                return;
-            }
-            Player player = event.player;
-            Level level = player.level();
-            BlockPos pos = player.blockPosition();
-            double worldTemp = sampleWorldTemperature(level, pos);
-            setWorldTemperature(player, worldTemp);
-
-            double body = getBodyTemperature(player);
-            double towardWorld = Mth.lerp(0.05D, body, worldTemp);
-            setBodyTemperature(player, towardWorld);
-
-            // Provide tangible penalties or bonuses based on the new temperature values.
-            if (Math.abs(towardWorld) <= COMFORT_BAND) {
-                player.addEffect(new MobEffectInstance(MobEffects.DIG_SPEED, 40, 0, true, false));
-            } else if (towardWorld > EXTREME_THRESHOLD) {
-                player.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 40, 1, true, true));
-                player.addEffect(new MobEffectInstance(MobEffects.WEAKNESS, 40, 0, true, true));
-            } else if (towardWorld < -EXTREME_THRESHOLD) {
-                player.addEffect(new MobEffectInstance(MobEffects.DIG_SLOWDOWN, 40, 1, true, true));
-                player.addEffect(new MobEffectInstance(MobEffects.HUNGER, 40, 0, true, true));
-            }
-
-            if (towardWorld > CRITICAL_THRESHOLD) {
-                player.setSecondsOnFire(1);
-            } else if (towardWorld < -CRITICAL_THRESHOLD) {
-                player.hurt(player.damageSources().freeze(), 1.0F);
-            }
+        if (towardWorld > CRITICAL_THRESHOLD) {
+            player.setSecondsOnFire(1);
+        } else if (towardWorld < -CRITICAL_THRESHOLD) {
+            player.hurt(player.damageSources().freeze(), 1.0F);
         }
     }
 }

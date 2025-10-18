@@ -16,10 +16,13 @@ public final class SurvivalSystems {
      * mod construction, mirroring how registry objects subscribe to their respective callbacks.
      */
     public static void init() {
-        // Each system exposes a lightweight listener object so we only subscribe the handlers we
-        // actually need.  Instantiating them here makes the lifecycle explicit for readers following
-        // along at home.
-        MinecraftForge.EVENT_BUS.register(new ThirstSystem.PlayerHooks());
-        MinecraftForge.EVENT_BUS.register(new TemperatureSystem.PlayerHooks());
+        // Rather than rely on anonymous inner listeners, we hook the systems' static consumers
+        // directly.  This makes the wiring crystal clear to students reading the call-site while
+        // avoiding accidental casts between unrelated listener classes (the culprit behind a crash
+        // report we received during QA).
+        MinecraftForge.EVENT_BUS.addListener(ThirstSystem::handlePlayerClone);
+        MinecraftForge.EVENT_BUS.addListener(ThirstSystem::handlePlayerTick);
+        MinecraftForge.EVENT_BUS.addListener(TemperatureSystem::handlePlayerClone);
+        MinecraftForge.EVENT_BUS.addListener(TemperatureSystem::handlePlayerTick);
     }
 }
