@@ -1,0 +1,13 @@
+{
+  "item.createsurvival.clockwork_canteen": "Clockwork Canteen",
+  "item.createsurvival.clockwork_canteen.sips": "Sips: %s / %s",
+  "item.createsurvival.clockwork_canteen.purity": "Purity Tier: %s",
+  "item.createsurvival.steam_ration": "Steam-Packed Ration",
+  "item.createsurvival.steam_ration.tooltip": "A hearty meal sealed under pressure that restores hydration when eaten.",
+  "block.createsurvival.mechanical_purifier": "Mechanical Water Purifier",
+  "block.createsurvival.mechanical_purifier.empty": "Fill the canteen before purifying it.",
+  "block.createsurvival.mechanical_purifier.unpowered": "Provide rotational power or redstone to spin the filters.",
+  "block.createsurvival.mechanical_purifier.purified": "Purified to tier %s!",
+  "block.createsurvival.mechanical_purifier.maxed": "Already at peak purity.",
+  "tooltip.createsurvival.purity_level": "Purity Tier %s"
+}
