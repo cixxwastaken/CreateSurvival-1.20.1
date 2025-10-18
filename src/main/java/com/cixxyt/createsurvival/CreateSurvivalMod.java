@@ -3,15 +3,12 @@ package com.cixxyt.createsurvival;
 import com.cixxyt.createsurvival.compat.coldsweat.ColdSweatCompat;
 import com.cixxyt.createsurvival.compat.create.CreateCompat;
 import com.cixxyt.createsurvival.compat.thirst.ThirstCompat;
-import com.cixxyt.createsurvival.content.items.FlaskItem;
 import com.cixxyt.createsurvival.registry.ModItems;
 import com.cixxyt.createsurvival.registry.ModBlocks;
-import net.minecraft.world.level.material.Fluids;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.ModList;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
-import com.simibubi.create.content.fluids.transfer.GenericItemFilling;
 
 
 

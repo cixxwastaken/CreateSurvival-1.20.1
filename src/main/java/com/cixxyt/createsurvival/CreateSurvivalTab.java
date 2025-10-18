@@ -8,7 +8,7 @@ import net.minecraft.network.chat.Component;
 public class CreateSurvivalTab {
 
     public static final CreativeModeTab TAB = CreativeModeTab.builder()
-            .icon(() -> new ItemStack(ModItems.FLASK.get()))
+            .icon(() -> new ItemStack(ModItems.TEST_ITEM.get()))
             .title(Component.literal("Create Survival"))
            .build();
 }

@@ -1,12 +1,10 @@
 package com.cixxyt.createsurvival.compat.thirst;
 
 import net.minecraft.core.BlockPos;
-//<<<<<<< codex/fix-crashing-errors-related-to-tooltip-828nej
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.network.chat.Style;
 import net.minecraft.network.chat.TextColor;
-//=======
-//>>>>>>> master
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
@@ -25,13 +23,11 @@ public class ThirstCompat {
     private static Method getPurityMethod;
     private static Method getPurityTextMethod;
     private static Method getPurityColorMethod;
-    private static Method addPurityMethod;
+    private static Method addPurityByBlockMethod;
+    private static Method addPurityByValueMethod;
     private static Method getBlockPurityMethod;
     private static Method givePurityEffectsMethod;
-//<<<<<<< codex/fix-crashing-errors-related-to-tooltip-828nej
-    private static Method appendPurityTooltipMethod;
-//=======
-//>>>>>>> master
+    private static Method givePurityEffectsStackMethod;
 
     public static boolean isLoaded() {
         return loaded;
@@ -48,29 +44,30 @@ public class ThirstCompat {
 
             Class<?> waterPurityClass = Class.forName("dev.ghen.thirst.content.purity.WaterPurity");
             getPurityMethod = waterPurityClass.getMethod("getPurity", ItemStack.class);
-//<<<<<<< codex/fix-crashing-errors-related-to-tooltip-828nej
             try {
                 getPurityTextMethod = waterPurityClass.getMethod("getPurityText", int.class);
             } catch (NoSuchMethodException ignored) {
                 getPurityTextMethod = null;
             }
-//=======
-            getPurityTextMethod = waterPurityClass.getMethod("getPurityText", int.class);
-//>>>>>>> master
             getPurityColorMethod = waterPurityClass.getMethod("getPurityColor", int.class);
-            addPurityMethod = waterPurityClass.getMethod("addPurity", ItemStack.class, int.class);
+            try {
+                addPurityByBlockMethod = waterPurityClass.getMethod("addPurity", ItemStack.class, BlockPos.class, Level.class);
+            } catch (NoSuchMethodException ignored) {
+                addPurityByBlockMethod = null;
+            }
+            try {
+                addPurityByValueMethod = waterPurityClass.getMethod("addPurity", ItemStack.class, int.class);
+            } catch (NoSuchMethodException ignored) {
+                addPurityByValueMethod = null;
+            }
             getBlockPurityMethod = waterPurityClass.getMethod("getBlockPurity", Level.class, BlockPos.class);
             givePurityEffectsMethod = waterPurityClass.getMethod("givePurityEffects", Player.class, int.class);
-
-//<<<<<<< codex/fix-crashing-errors-related-to-tooltip-828nej
             try {
-                appendPurityTooltipMethod = waterPurityClass.getMethod("appendTooltip", ItemStack.class, List.class);
+                givePurityEffectsStackMethod = waterPurityClass.getMethod("givePurityEffects", Player.class, ItemStack.class);
             } catch (NoSuchMethodException ignored) {
-                appendPurityTooltipMethod = null;
+                givePurityEffectsStackMethod = null;
             }
 
-//=======
-//>>>>>>> master
             loaded = true;
         } catch (Exception e) {
             clearReflection();
@@ -84,13 +81,11 @@ public class ThirstCompat {
         getPurityMethod = null;
         getPurityTextMethod = null;
         getPurityColorMethod = null;
-        addPurityMethod = null;
+        addPurityByBlockMethod = null;
+        addPurityByValueMethod = null;
         getBlockPurityMethod = null;
         givePurityEffectsMethod = null;
-//<<<<<<< codex/fix-crashing-errors-related-to-tooltip-828nej
-        appendPurityTooltipMethod = null;
-//=======
-//>>>>>>> master
+        givePurityEffectsStackMethod = null;
     }
 
     public static void drink(Player player, int thirst, int quenched) {
@@ -127,7 +122,6 @@ public class ThirstCompat {
         return 0;
     }
 
-//<<<<<<< codex/fix-crashing-errors-related-to-tooltip-828nej
     public static Component getPurityComponent(int purity) {
         if (!loaded) {
             return Component.literal("Unknown");
@@ -136,9 +130,6 @@ public class ThirstCompat {
         try {
             if (getPurityTextMethod != null) {
                 Object result = getPurityTextMethod.invoke(null, purity);
-                if (result instanceof Component component) {
-                    return component;
-                }
                 if (result != null) {
                     return Component.literal(result.toString());
                 }
@@ -161,71 +152,52 @@ public class ThirstCompat {
         return 0xFFFFFF;
     }
 
-    public static void givePurityEffects(Player player, int purity) {
-        if (!loaded || givePurityEffectsMethod == null) {
-            return;
+    public static boolean applyPurityEffects(Player player, ItemStack stack) {
+        if (!loaded) {
+            return true;
         }
 
         try {
-            givePurityEffectsMethod.invoke(null, player, purity);
+            if (givePurityEffectsStackMethod != null) {
+                Object result = givePurityEffectsStackMethod.invoke(null, player, stack);
+                if (result instanceof Boolean booleanResult) {
+                    return booleanResult;
+                }
+            }
         } catch (Exception ignored) {}
+
+        return applyPurityEffects(player, getPurity(stack));
+    }
+
+    public static boolean applyPurityEffects(Player player, int purity) {
+        if (!loaded || givePurityEffectsMethod == null) {
+            return true;
+        }
+
+        try {
+            Object result = givePurityEffectsMethod.invoke(null, player, purity);
+            if (result instanceof Boolean booleanResult) {
+                return booleanResult;
+            }
+        } catch (Exception ignored) {}
+
+        return true;
     }
 
     public static void applyBlockPurity(ItemStack stack, Level level, BlockPos pos) {
-        if (!loaded || addPurityMethod == null || getBlockPurityMethod == null) {
+        if (!loaded || getBlockPurityMethod == null) {
             return;
         }
 
         try {
-//=======
-    public static String getPurityText(int purity) {
-        if (!loaded || getPurityTextMethod == null) {
-            return "Unknown";
-        }
-
-        try {
-            Object result = getPurityTextMethod.invoke(null, purity);
-            if (result != null) {
-                return result.toString();
+            if (addPurityByBlockMethod != null) {
+                addPurityByBlockMethod.invoke(null, stack, pos, level);
+                return;
             }
-        } catch (Exception ignored) {}
-        return "Unknown";
-    }
 
-    public static int getPurityColor(int purity) {
-        if (!loaded || getPurityColorMethod == null) {
-            return 0xFFFFFF;
-        }
-
-        try {
-            Object result = getPurityColorMethod.invoke(null, purity);
-            if (result instanceof Number number) {
-                return number.intValue();
-            }
-        } catch (Exception ignored) {}
-        return 0xFFFFFF;
-    }
-
-    public static void givePurityEffects(Player player, int purity) {
-        if (!loaded || givePurityEffectsMethod == null) {
-            return;
-        }
-
-        try {
-            givePurityEffectsMethod.invoke(null, player, purity);
-        } catch (Exception ignored) {}
-    }
-
-    public static void applyBlockPurity(ItemStack stack, Level level, BlockPos pos) {
-        if (!loaded || addPurityMethod == null || getBlockPurityMethod == null) {
-            return;
-        }
-
-        try {
-//>>>>>>> master
             Object result = getBlockPurityMethod.invoke(null, level, pos);
-            if (result instanceof Number number) {
-                addPurityMethod.invoke(null, stack, number.intValue());
+            if (result instanceof Number number && addPurityByValueMethod != null) {
+                addPurityByValueMethod.invoke(null, stack, number.intValue());
             }
         } catch (Exception ignored) {}
     }
@@ -239,19 +211,10 @@ public class ThirstCompat {
             return;
         }
 
-        try {
-            if (appendPurityTooltipMethod != null) {
-                appendPurityTooltipMethod.invoke(null, stack, tooltip);
-                return;
-            }
-        } catch (Exception ignored) {
-            // Fallback to manual tooltip below
-        }
-
         int purity = getPurity(stack);
         Component purityText = getPurityComponent(purity);
         int color = getPurityColor(purity) & 0xFFFFFF;
         MutableComponent component = Component.literal("Purity: ").append(purityText.copy());
-        tooltip.add(component.withStyle(style -> style.withColor(TextColor.fromRgb(color))));
+        tooltip.add(component.withStyle(Style.EMPTY.withColor(TextColor.fromRgb(color))));
     }
 }
