@@ -5,14 +5,9 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.Style;
 import net.minecraft.network.chat.TextColor;
-import net.minecraft.core.BlockPos;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.tags.FluidTags;
-import net.minecraft.tags.TagKey;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.material.Fluid;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.util.LazyOptional;
 
@@ -113,14 +108,9 @@ public class ThirstCompat {
         } catch (Exception ignored) {}
     }
 
-    public static TagKey<Fluid> getWaterTag() {
-        return FluidTags.WATER;
-    }
-
     public static int getPurity(ItemStack stack) {
-        int fallback = getStoredPurity(stack);
         if (!loaded || getPurityMethod == null) {
-            return fallback;
+            return 0;
         }
 
         try {
@@ -129,12 +119,12 @@ public class ThirstCompat {
                 return number.intValue();
             }
         } catch (Exception ignored) {}
-        return fallback;
+        return 0;
     }
 
     public static Component getPurityComponent(int purity) {
         if (!loaded) {
-            return Component.translatable("tooltip.createsurvival.purity_level", purity);
+            return Component.literal("Unknown");
         }
 
         try {
@@ -145,17 +135,12 @@ public class ThirstCompat {
                 }
             }
         } catch (Exception ignored) {}
-        return Component.translatable("tooltip.createsurvival.purity_level", purity);
+        return Component.literal("Unknown");
     }
 
     public static int getPurityColor(int purity) {
         if (!loaded || getPurityColorMethod == null) {
-            return switch (Math.max(0, purity)) {
-                case 0 -> 0x6B6B6B;
-                case 1 -> 0x7A4C20;
-                case 2 -> 0x4D8A9B;
-                default -> 0x3BC6FF;
-            };
+            return 0xFFFFFF;
         }
 
         try {
@@ -201,7 +186,6 @@ public class ThirstCompat {
 
     public static void applyBlockPurity(ItemStack stack, Level level, BlockPos pos) {
         if (!loaded || getBlockPurityMethod == null) {
-            setPurity(stack, estimatePurity(level, pos));
             return;
         }
 
@@ -216,47 +200,6 @@ public class ThirstCompat {
                 addPurityByValueMethod.invoke(null, stack, number.intValue());
             }
         } catch (Exception ignored) {}
-    }
-
-    public static void setPurity(ItemStack stack, int purity) {
-        if (stack.isEmpty()) {
-            return;
-        }
-
-        if (loaded && addPurityByValueMethod != null) {
-            try {
-                addPurityByValueMethod.invoke(null, stack, purity);
-            } catch (Exception ignored) {}
-        }
-
-        CompoundTag tag = stack.getOrCreateTag();
-        if (purity <= 0) {
-            tag.remove("Purity");
-        } else {
-            tag.putInt("Purity", purity);
-        }
-    }
-
-    private static int getStoredPurity(ItemStack stack) {
-        if (stack.isEmpty()) {
-            return 0;
-        }
-        CompoundTag tag = stack.getTag();
-        if (tag != null && tag.contains("Purity")) {
-            return tag.getInt("Purity");
-        }
-        return 0;
-    }
-
-    private static int estimatePurity(Level level, BlockPos pos) {
-        if (level == null || pos == null) {
-            return 0;
-        }
-        var fluidState = level.getFluidState(pos);
-        if (fluidState.is(FluidTags.WATER)) {
-            return fluidState.isSource() ? 3 : 2;
-        }
-        return 0;
     }
 
     public static void appendPurityTooltip(ItemStack stack, List<Component> tooltip) {
